@@ -31,6 +31,7 @@ const defaultStackSize = 512 * 1024
 proc GC_addStack(bottom: pointer) {.cdecl, importc.}
 proc GC_removeStack(bottom: pointer) {.cdecl, importc.}
 proc GC_setActiveStack(bottom: pointer) {.cdecl, importc.}
+proc GC_getActiveStack() : pointer {.cdecl, importc.}
 
 const
   CORO_BACKEND_UCONTEXT = 0
@@ -156,6 +157,7 @@ type
     coroutines: DoublyLinkedList[CoroutinePtr]
     current: DoublyLinkedNode[CoroutinePtr]
     loop: Coroutine
+    ntbottom: pointer
 
 var ctx {.threadvar.}: CoroutineLoopContext
 
@@ -173,6 +175,7 @@ proc initialize() =
     ctx.coroutines = initDoublyLinkedList[CoroutinePtr]()
     ctx.loop = Coroutine()
     ctx.loop.state = CORO_EXECUTING
+    ctx.ntbottom = GC_getActiveStack()
     when coroBackend == CORO_BACKEND_FIBERS:
       ctx.loop.execContext = ConvertThreadToFiberEx(nil, FIBER_FLAG_FLOAT_SWITCH)
 
@@ -183,6 +186,7 @@ proc switchTo(current, to: CoroutinePtr) =
   to.lastRun = getTicks()
   # Update position of current stack so gc invoked from another stack knows how much to scan.
   GC_setActiveStack(current.stack.bottom)
+  nimGC_setStackBottom(current.stack.bottom)
   var frame = getFrameState()
   block:
     # Execution will switch to another fiber now. We do not need to update current stack
@@ -205,12 +209,14 @@ proc switchTo(current, to: CoroutinePtr) =
   # Execution was just resumed. Restore frame information and set active stack.
   setFrameState(frame)
   GC_setActiveStack(current.stack.bottom)
+  nimGC_setStackBottom(ctx.ntbottom)
 
 proc suspend*(sleepTime: float=0) =
   ## Stops coroutine execution and resumes no sooner than after ``sleeptime`` seconds.
   ## Until then other coroutines are executed.
   var current = getCurrent()
   current.sleepTime = sleepTime
+  nimGC_setStackBottom(ctx.ntbottom)
   switchTo(current, addr(ctx.loop))
 
 proc runCurrentTask() =
@@ -220,6 +226,7 @@ proc runCurrentTask() =
   block:
     var current = getCurrent()
     current.stack.bottom = sp
+    nimGC_setStackBottom(current.stack.bottom)
     # Execution of new fiber just started. Since it was entered not through `switchTo` we
     # have to set active stack here as well. GC_removeStack() has to be called in main loop
     # because we still need stack available in final suspend(0) call from which we will not
@@ -234,6 +241,7 @@ proc runCurrentTask() =
       echo "Unhandled exception in coroutine."
       writeStackTrace()
     current.state = CORO_FINISHED
+  nimGC_setStackBottom(ctx.ntbottom)
   suspend(0)                      # Exit coroutine without returning from coroExecWithStack()
   doAssert false
 

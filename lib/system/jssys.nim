@@ -142,7 +142,7 @@ proc raiseException(e: ref Exception, ename: cstring) {.
 
 proc reraiseException() {.compilerproc, asmNoStackFrame.} =
   if lastJSError == nil:
-    raise newException(ReraiseError, "no exception to reraise")
+    raisee newException(ReraiseError, "no exception to reraise")
   else:
     if excHandler == 0:
       if isNimException():
@@ -151,19 +151,19 @@ proc reraiseException() {.compilerproc, asmNoStackFrame.} =
     asm "throw lastJSError;"
 
 proc raiseOverflow {.exportc: "raiseOverflow", noreturn, compilerProc.} =
-  raise newException(OverflowError, "over- or underflow")
+  raisee newException(OverflowError, "over- or underflow")
 
 proc raiseDivByZero {.exportc: "raiseDivByZero", noreturn, compilerProc.} =
-  raise newException(DivByZeroError, "division by zero")
+  raisee newException(DivByZeroError, "division by zero")
 
 proc raiseRangeError() {.compilerproc, noreturn.} =
-  raise newException(RangeError, "value out of range")
+  raisee newException(RangeError, "value out of range")
 
 proc raiseIndexError(i, a, b: int) {.compilerproc, noreturn.} =
-  raise newException(IndexError, formatErrorIndexBound(int(i), int(a), int(b)))
+  raisee newException(IndexError, formatErrorIndexBound(int(i), int(a), int(b)))
 
 proc raiseFieldError(f: string) {.compilerproc, noreturn.} =
-  raise newException(FieldError, f & " is not accessible")
+  raisee newException(FieldError, f & " is not accessible")
 
 proc setConstr() {.varargs, asmNoStackFrame, compilerproc.} =
   asm """
@@ -370,7 +370,7 @@ else:
     var node : JSRef
     {.emit: "`node` = document.getElementsByTagName('body')[0];".}
     if node.isNil:
-      raise newException(ValueError, "<body> element does not exist yet!")
+      raisee newException(ValueError, "<body> element does not exist yet!")
     {.emit: """
     `node`.appendChild(document.createTextNode(`x`));
     `node`.appendChild(document.createElement("br"));
@@ -380,7 +380,7 @@ else:
     var node : JSRef
     {.emit: "`node` = document.getElementsByTagName('body')[0];".}
     if node.isNil:
-      raise newException(IOError, "<body> element does not exist yet!")
+      raisee newException(IOError, "<body> element does not exist yet!")
     {.emit: """
     for (var i = 0; i < arguments.length; ++i) {
       var x = `toJSStr`(arguments[i]);
@@ -640,7 +640,7 @@ proc chckObj(obj, subclass: PNimType) {.compilerproc.} =
   if x == subclass: return # optimized fast path
   while x != subclass:
     if x == nil:
-      raise newException(ObjectConversionError, "invalid object conversion")
+      raisee newException(ObjectConversionError, "invalid object conversion")
     x = x.base
 
 proc isObj(obj, subclass: PNimType): bool {.compilerproc.} =

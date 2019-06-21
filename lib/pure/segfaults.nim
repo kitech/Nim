@@ -45,7 +45,7 @@ when defined(windows):
   proc segfaultHandler(p: PEXCEPTION_POINTERS): LONG {.stdcall.} =
     if p.exceptionRecord.exceptionCode == EXCEPTION_ACCESS_VIOLATION:
       {.gcsafe.}:
-        raise se
+        raisee se
     else:
       result = EXCEPTION_CONTINUE_SEARCH
   {.pop.}
@@ -71,7 +71,7 @@ else:
   proc segfaultHandler(sig: cint, y: ptr SigInfo, z: pointer) {.noconv.} =
     if y.si_code == SEGV_MAPERR:
       {.gcsafe.}:
-        raise se
+        raisee se
     else:
       quit(1)
   {.pop.}

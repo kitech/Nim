@@ -42,7 +42,7 @@ template createCb(retFutureSym, iteratorNameSym,
           if not retFutureSym.finished:
             let msg = "Async procedure ($1) yielded `nil`, are you await'ing a " &
                     "`nil` Future?"
-            raise newException(AssertionError, msg % strName)
+            raisee newException(AssertionError, msg % strName)
         else:
           {.gcsafe.}:
             {.push hint[ConvFromXtoItselfNotNeeded]: off.}
@@ -54,7 +54,7 @@ template createCb(retFutureSym, iteratorNameSym,
       if retFutureSym.finished:
         # Take a look at tasyncexceptions for the bug which this fixes.
         # That test explains it better than I can here.
-        raise
+        raisee newException(AssertionError, "heheh")
       else:
         retFutureSym.fail(getCurrentException())
 

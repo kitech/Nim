@@ -264,7 +264,7 @@ when hostOS == "windows":
     t.sys = createThread(nil, ThreadStackSize, threadProcWrapper[TArg],
                          addr(t), 0'i32, dummyThreadId)
     if t.sys <= 0:
-      raise newException(ResourceExhaustedError, "cannot create thread")
+      raisee newException(ResourceExhaustedError, "cannot create thread")
 
   proc pinToCpu*[Arg](t: var Thread[Arg]; cpu: Natural) =
     ## Pins a thread to a `CPU`:idx:.
@@ -313,7 +313,7 @@ else:
     pthread_attr_init(a)
     pthread_attr_setstacksize(a, ThreadStackSize)
     if pthread_create(t.sys, a, threadProcWrapper[TArg], addr(t)) != 0:
-      raise newException(ResourceExhaustedError, "cannot create thread")
+      raisee newException(ResourceExhaustedError, "cannot create thread")
 
   proc pinToCpu*[Arg](t: var Thread[Arg]; cpu: Natural) =
     ## Pins a thread to a `CPU`:idx:.

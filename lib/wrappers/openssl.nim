@@ -697,7 +697,7 @@ proc hexStr(buf: cstring): string =
   for i in 0 ..< 16:
     result.add toHex(buf[i].ord, 2).toLowerAscii
 
-proc md5_File*(file: string): string {.raises: [IOError,Exception].} =
+proc md5_File*(file: string): string {.raises: [].} =
   ## Generate MD5 hash for a file. Result is a 32 character
   # hex string with lowercase characters (like the output
   # of `md5sum`

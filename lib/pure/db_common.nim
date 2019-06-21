@@ -97,4 +97,4 @@ proc dbError*(msg: string) {.noreturn, noinline.} =
   var e: ref DbError
   new(e)
   e.msg = msg
-  raise e
+  raisee e

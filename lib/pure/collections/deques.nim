@@ -12,7 +12,7 @@
 ##
 ## None of the procs that get an individual value from the deque can be used
 ## on an empty deque.
-## If compiled with `boundChecks` option, those procs will raise an `IndexError`
+## If compiled with `boundChecks` option, those procs will raisee an `IndexError`
 ## on such access. This should not be relied upon, as `-d:release` will
 ## disable those checks and may return garbage or crash the program.
 ##
@@ -85,16 +85,16 @@ template emptyCheck(deq) =
   # Bounds check for the regular deque access.
   when compileOption("boundChecks"):
     if unlikely(deq.count < 1):
-      raise newException(IndexError, "Empty deque.")
+      raisee newException(IndexError, "Empty deque.")
 
 template xBoundsCheck(deq, i) =
   # Bounds check for the array like accesses.
   when compileOption("boundChecks"):  # d:release should disable this.
     if unlikely(i >= deq.count):  # x < deq.low is taken care by the Natural parameter
-      raise newException(IndexError,
+      raisee newException(IndexError,
                          "Out of bounds: " & $i & " > " & $(deq.count - 1))
     if unlikely(i < 0):  # when used with BackwardsIndex
-      raise newException(IndexError,
+      raisee newException(IndexError,
                          "Out of bounds: " & $i & " < 0")
 
 proc `[]`*[T](deq: Deque[T], i: Natural) : T {.inline.} =

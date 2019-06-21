@@ -583,7 +583,7 @@ proc sqlError(p: SqlParser, msg: string) =
   var e: ref SqlParseError
   new(e)
   e.msg = errorStr(p, msg)
-  raise e
+  raisee e
 
 proc isKeyw(p: SqlParser, keyw: string): bool =
   result = p.tok.kind == tkIdentifier and
@@ -1159,7 +1159,7 @@ proc parseStmt(p: var SqlParser; parent: SqlNode) =
 
 proc parse(p: var SqlParser): SqlNode =
   ## parses the content of `p`'s input stream and returns the SQL AST.
-  ## Syntax errors raise an `SqlParseError` exception.
+  ## Syntax errors raisee an `SqlParseError` exception.
   result = newNode(nkStmtList)
   while p.tok.kind != tkEof:
     parseStmt(p, result)
@@ -1483,7 +1483,7 @@ when not defined(js):
   proc parseSQL*(input: Stream, filename: string): SqlNode =
     ## parses the SQL from `input` into an AST and returns the AST.
     ## `filename` is only used for error messages.
-    ## Syntax errors raise an `SqlParseError` exception.
+    ## Syntax errors raisee an `SqlParseError` exception.
     var p: SqlParser
     open(p, input, filename)
     try:
@@ -1494,5 +1494,5 @@ when not defined(js):
   proc parseSQL*(input: string, filename=""): SqlNode =
     ## parses the SQL from `input` into an AST and returns the AST.
     ## `filename` is only used for error messages.
-    ## Syntax errors raise an `SqlParseError` exception.
+    ## Syntax errors raisee an `SqlParseError` exception.
     parseSQL(newStringStream(input), "")

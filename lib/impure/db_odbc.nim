@@ -163,7 +163,7 @@ proc dbError*(db: var DbConn) {.
       properFreeResult(SQL_HANDLE_STMT, db.stmt)
     properFreeResult(SQL_HANDLE_DBC, db.hDb)
     properFreeResult(SQL_HANDLE_ENV, db.env)
-    raise e
+    raisee e
 
 proc sqlCheck(db: var DbConn, resVal: TSqlSmallInt) {.raises: [DbError]} =
   ## Wrapper that raises [EDb] if ``resVal`` is neither SQL_SUCCESS or SQL_NO_DATA

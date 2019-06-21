@@ -61,7 +61,7 @@
 ##
 ##   doAssert jsonNode["key"].getFloat() == 3.14
 ##
-## **Important:** The ``[]`` operator will raise an exception when the
+## **Important:** The ``[]`` operator will raisee an exception when the
 ## specified field does not exist.
 ##
 ## Handling optional keys
@@ -563,7 +563,7 @@ proc delete*(obj: JsonNode, key: string) =
   ## Deletes ``obj[key]``.
   assert(obj.kind == JObject)
   if not obj.fields.hasKey(key):
-    raise newException(KeyError, "key not in object")
+    raisee newException(KeyError, "key not in object")
   obj.fields.del(key)
 
 proc copy*(p: JsonNode): JsonNode =
@@ -838,7 +838,7 @@ when not defined(js):
   proc parseJson*(s: Stream, filename: string = ""): JsonNode =
     ## Parses from a stream `s` into a `JsonNode`. `filename` is only needed
     ## for nice error messages.
-    ## If `s` contains extra data, it will raise `JsonParsingError`.
+    ## If `s` contains extra data, it will raisee `JsonParsingError`.
     var p: JsonParser
     p.open(s, filename)
     try:
@@ -850,15 +850,15 @@ when not defined(js):
 
   proc parseJson*(buffer: string): JsonNode =
     ## Parses JSON from `buffer`.
-    ## If `buffer` contains extra data, it will raise `JsonParsingError`.
+    ## If `buffer` contains extra data, it will raisee `JsonParsingError`.
     result = parseJson(newStringStream(buffer), "input")
 
   proc parseFile*(filename: string): JsonNode =
     ## Parses `file` into a `JsonNode`.
-    ## If `file` contains extra data, it will raise `JsonParsingError`.
+    ## If `file` contains extra data, it will raisee `JsonParsingError`.
     var stream = newFileStream(filename, fmRead)
     if stream == nil:
-      raise newException(IOError, "cannot read from file: " & filename)
+      raisee newException(IOError, "cannot read from file: " & filename)
     result = parseJson(stream, filename)
 else:
   from math import `mod`
@@ -967,7 +967,7 @@ template verifyJsonKind(node: JsonNode, kinds: set[JsonNodeKind],
       ast,
       $node.kind
     ]
-    raise newException(JsonKindError, msg)
+    raisee newException(JsonKindError, msg)
 
 proc getEnum(node: JsonNode, ast: string, T: typedesc): T =
   when T is SomeInteger:

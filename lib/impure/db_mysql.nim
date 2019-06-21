@@ -102,7 +102,7 @@ proc dbError*(db: DbConn) {.noreturn.} =
   var e: ref DbError
   new(e)
   e.msg = $mysql.error(PMySQL db)
-  raise e
+  raisee e
 
 when false:
   proc dbQueryOpt*(db: DbConn, query: string, args: varargs[string, `$`]) =
@@ -165,7 +165,7 @@ iterator fastRows*(db: DbConn, query: SqlQuery,
   ## if you require **ALL** the rows.
   ##
   ## Breaking the fastRows() iterator during a loop will cause the next
-  ## database query to raise an [EDb] exception ``Commands out of sync``.
+  ## database query to raisee an [EDb] exception ``Commands out of sync``.
   rawExec(db, query, args)
   var sqlres = mysql.useResult(PMySQL db)
   if sqlres != nil:

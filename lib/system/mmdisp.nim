@@ -268,7 +268,7 @@ elif defined(gogc):
     result = goMalloc(size.uint)
 
   proc realloc(p: pointer, newsize: Natural): pointer =
-    raise newException(Exception, "not implemented")
+    raisee newException(Exception, "not implemented")
 
   proc dealloc(p: pointer) =
     discard

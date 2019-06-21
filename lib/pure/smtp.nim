@@ -77,7 +77,7 @@ proc debugRecv(smtp: Smtp | AsyncSmtp): Future[TaintedString] {.multisync.} =
 
 proc quitExcpt(smtp: Smtp, msg: string) =
   smtp.debugSend("QUIT")
-  raise newException(ReplyError, msg)
+  raisee newException(ReplyError, msg)
 
 const compiledWithSsl = defined(ssl)
 

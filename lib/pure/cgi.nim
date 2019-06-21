@@ -69,7 +69,7 @@ proc cgiError*(msg: string) {.noreturn.} =
   var e: ref CgiError
   new(e)
   e.msg = msg
-  raise e
+  raisee e
 
 proc getEncodedData(allowedMethods: set[RequestMethod]): string =
   case getEnv("REQUEST_METHOD").string

@@ -129,7 +129,7 @@ proc dbError*(db: DbConn) {.noreturn.} =
   var e: ref DbError
   new(e)
   e.msg = $sqlite3.errmsg(db)
-  raise e
+  raisee e
 
 proc dbQuote*(s: string): string =
   ## Escapes the `'` (single quote) char to `''`.
@@ -218,7 +218,7 @@ iterator fastRows*(db: DbConn, query: SqlQuery,
   ## if you require **ALL** the rows.
   ##
   ## **Note:** Breaking the `fastRows()` iterator during a loop will cause the
-  ## next database query to raise a `DbError` exception ``unable to close due
+  ## next database query to raisee a `DbError` exception ``unable to close due
   ## to ...``.
   ##
   ## **Examples:**

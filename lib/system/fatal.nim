@@ -28,6 +28,26 @@ elif defined(nimQuirky) and not defined(nimscript):
   proc sysFatal(exceptn: typedesc, message: string) {.inline, noReturn.} =
     sysFatal(exceptn, message, "")
 
+elif not defined(js) and not defined(nimscript):
+  ## added for noexcept
+  import ansi_c
+
+  proc name(t: typedesc): string {.magic: "TypeTrait".}
+
+  proc sysFatal(exceptn: typedesc, message, arg: string) {.inline, noReturn.} =
+    var buf = newStringOfCap(200)
+    add(buf, "Error: unhandled exception: ")
+    add(buf, message)
+    add(buf, arg)
+    add(buf, " [")
+    add(buf, name exceptn)
+    add(buf, "]")
+    cstderr.rawWrite buf
+    quit 1
+
+  proc sysFatal(exceptn: typedesc, message: string) {.inline, noReturn.} =
+    sysFatal(exceptn, message, "")
+
 else:
   proc sysFatal(exceptn: typedesc, message: string) {.inline, noReturn.} =
     when declared(owned):

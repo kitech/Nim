@@ -61,7 +61,7 @@
 ## callback on this future which will be called once the future completes.
 ## All the callback does is write the data stored in the future to ``stdout``.
 ## The ``read`` function is used for this and it checks whether the future
-## completes with an error for you (if it did it will simply raise the
+## completes with an error for you (if it did it will simply raisee the
 ## error), if there is no error however it returns the value of the future.
 ##
 ## Asynchronous procedures
@@ -306,7 +306,7 @@ when defined(windows) or defined(nimdoc):
     ## Ensures that file descriptor has been registered with the dispatcher.
     let p = getGlobalDispatcher()
     if fd notin p.handles:
-      raise newException(ValueError,
+      raisee newException(ValueError,
         "Operation performed on a socket which has not been registered with" &
         " the dispatcher yet.")
 
@@ -318,7 +318,7 @@ when defined(windows) or defined(nimdoc):
   proc runOnce(timeout = 500): bool =
     let p = getGlobalDispatcher()
     if p.handles.len == 0 and p.timers.len == 0 and p.callbacks.len == 0:
-      raise newException(ValueError,
+      raisee newException(ValueError,
         "No handles or timers registered in dispatcher.")
 
     result = false
@@ -660,7 +660,7 @@ when defined(windows) or defined(nimdoc):
             retFuture.complete(bytesCount)
           else:
             # datagram sockets don't have disconnection,
-            # so we can just raise an exception
+            # so we can just raisee an exception
             retFuture.fail(newException(OSError, osErrorMsg(errcode)))
     )
 
@@ -1151,7 +1151,7 @@ else:
       newEvents.incl(Event.Read)
       if len(adata.writeList) != 0: newEvents.incl(Event.Write)
     do:
-      raise newException(ValueError, "File descriptor not registered.")
+      raisee newException(ValueError, "File descriptor not registered.")
     p.selector.updateHandle(fd.SocketHandle, newEvents)
 
   proc addWrite*(fd: AsyncFD, cb: Callback) =
@@ -1162,7 +1162,7 @@ else:
       newEvents.incl(Event.Write)
       if len(adata.readList) != 0: newEvents.incl(Event.Read)
     do:
-      raise newException(ValueError, "File descriptor not registered.")
+      raisee newException(ValueError, "File descriptor not registered.")
     p.selector.updateHandle(fd.SocketHandle, newEvents)
 
   proc hasPendingOperations*(): bool =
@@ -1256,7 +1256,7 @@ else:
   proc closeSocket*(sock: AsyncFD) =
     let selector = getGlobalDispatcher().selector
     if sock.SocketHandle notin selector:
-      raise newException(ValueError, "File descriptor not registered.")
+      raisee newException(ValueError, "File descriptor not registered.")
 
     let data = selector.getData(sock.SocketHandle)
     sock.unregister()
@@ -1265,7 +1265,7 @@ else:
     # waiting for the socket to become readable and/or writeable.
     for cb in data.readList & data.writeList:
       if not cb(sock):
-        raise newException(
+        raisee newException(
           ValueError, "Expecting async operations to stop when fd has closed."
         )
 
@@ -1277,7 +1277,7 @@ else:
                        Event.Vnode}
 
     if p.selector.isEmpty() and p.timers.len == 0 and p.callbacks.len == 0:
-      raise newException(ValueError,
+      raisee newException(ValueError,
         "No handles or timers registered in dispatcher.")
 
     result = false
@@ -1726,7 +1726,7 @@ template asyncAddrInfoLoop(addrInfo: ptr AddrInfo, fd: untyped,
           except:
             freeAddrInfo(addrInfo)
             closeUnusedFds()
-            raise getCurrentException()
+            raisee getCurrentException()
           when defined(windows):
             curFd.SocketHandle.bindToDomain(domain)
           fdPerDomain[ord(domain)] = curFd

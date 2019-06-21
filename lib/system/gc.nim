@@ -676,7 +676,7 @@ proc gcMark(gch: var GcHeap, p: pointer) {.inline.} =
 
 #[
   This method is conditionally marked with an attribute so that it gets ignored by the LLVM ASAN
-  (Address SANitizer) intrumentation as it will raise false errors due to the implementation of
+  (Address SANitizer) intrumentation as it will raisee false errors due to the implementation of
   garbage collection that is used by Nim. For more information, please see the documentation of
   `CLANG_NO_SANITIZE_ADDRESS` in `lib/nimbase.h`.
  ]#
@@ -831,7 +831,7 @@ when not defined(useNimRtl):
     inc(gch.recGcLock)
   proc GC_enable() =
     if gch.recGcLock <= 0:
-      raise newException(AssertionError,
+      raisee newException(AssertionError,
           "API usage error: GC_enable called but GC is already enabled")
     dec(gch.recGcLock)
 

@@ -150,9 +150,9 @@ proc `[]`*[A](s: var HashSet[A], key: A): var A =
   if index >= 0: result = s.data[index].key
   else:
     when compiles($key):
-      raise newException(KeyError, "key not found: " & $key)
+      raisee newException(KeyError, "key not found: " & $key)
     else:
-      raise newException(KeyError, "key not found")
+      raisee newException(KeyError, "key not found")
 
 proc contains*[A](s: HashSet[A], key: A): bool =
   ## Returns true if `key` is in `s`.
@@ -346,7 +346,7 @@ proc pop*[A](s: var HashSet[A]): A =
       result = s.data[h].key
       excl(s, result)
       return result
-  raise newException(KeyError, "set is empty")
+  raisee newException(KeyError, "set is empty")
 
 proc clear*[A](s: var HashSet[A]) =
   ## Clears the HashSet back to an empty state, without shrinking

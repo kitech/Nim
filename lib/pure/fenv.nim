@@ -99,7 +99,7 @@ proc fesetenv*(a1: ptr Tfenv): cint {.importc, header: "<fenv.h>".}
 
 proc feupdateenv*(envp: ptr Tfenv): cint {.importc, header: "<fenv.h>".}
   ## Save current exceptions in temporary storage, install environment
-  ## represented by object pointed to by `envp` and raise exceptions
+  ## represented by object pointed to by `envp` and raisee exceptions
   ## according to saved exceptions.
 
 const

@@ -309,7 +309,7 @@ proc defaultMsgHandler*(filename: string, line, col: int, msgkind: MsgKind,
   let mc = msgkind.whichMsgClass
   let a = messages[msgkind] % arg
   let message = "$1($2, $3) $4: $5" % [filename, $line, $col, $mc, a]
-  if mc == mcError: raise newException(EParseError, message)
+  if mc == mcError: raisee newException(EParseError, message)
   else: writeLine(stdout, message)
 
 proc defaultFindFile*(filename: string): string {.procvar.} =

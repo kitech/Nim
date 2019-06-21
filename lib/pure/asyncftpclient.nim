@@ -139,7 +139,7 @@ proc expectReply(ftp: AsyncFtpClient): Future[TaintedString] {.async.} =
     result.add("\n" & line)
     count.inc()
     if count >= multiLineLimit:
-      raise newException(ReplyError, "Reached maximum multi-line reply count.")
+      raisee newException(ReplyError, "Reached maximum multi-line reply count.")
 
 proc send*(ftp: AsyncFtpClient, m: string): Future[TaintedString] {.async.} =
   ## Send a message to the server, and wait for a primary reply.
@@ -152,7 +152,7 @@ proc send*(ftp: AsyncFtpClient, m: string): Future[TaintedString] {.async.} =
 proc assertReply(received: TaintedString, expected: varargs[string]) =
   for i in items(expected):
     if received.string.startsWith(i): return
-  raise newException(ReplyError,
+  raisee newException(ReplyError,
                      "Expected reply '$1' got: $2" %
                      [expected.join("' or '"), received.string])
 
@@ -338,10 +338,10 @@ proc retrFile*(ftp: AsyncFtpClient, file, dest: string,
   var reply = await ftp.send("RETR " & file.normalizePathSep)
   assertReply reply, ["125", "150"]
   if {'(', ')'} notin reply.string:
-    raise newException(ReplyError, "Reply has no file size.")
+    raisee newException(ReplyError, "Reply has no file size.")
   var fileSize: BiggestInt
   if reply.string.captureBetween('(', ')').parseBiggestInt(fileSize) == 0:
-    raise newException(ReplyError, "Reply has no file size.")
+    raisee newException(ReplyError, "Reply has no file size.")
 
   await getFile(ftp, destFile, fileSize, onProgressChanged)
   destFile.close()

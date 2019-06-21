@@ -96,7 +96,7 @@ template withValue*[A, B](t: var SharedTable[A, B], key: A,
   ##     value.uid = 1000
   ##   do:
   ##     # block is executed when ``key`` not in ``t``
-  ##     raise newException(KeyError, "Key not found")
+  ##     raisee newException(KeyError, "Key not found")
   ##
   acquire(t.lock)
   try:
@@ -121,9 +121,9 @@ proc mget*[A, B](t: var SharedTable[A, B], key: A): var B =
     if hasKey: result = t.data[index].val
   if not hasKey:
     when compiles($key):
-      raise newException(KeyError, "key not found: " & $key)
+      raisee newException(KeyError, "key not found: " & $key)
     else:
-      raise newException(KeyError, "key not found")
+      raisee newException(KeyError, "key not found")
 
 proc mgetOrPut*[A, B](t: var SharedTable[A, B], key: A, val: B): var B =
   ## retrieves value at ``t[key]`` or puts ``val`` if not present, either way

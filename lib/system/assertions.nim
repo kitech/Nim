@@ -65,19 +65,19 @@ template onFailedAssert*(msg, code: untyped): untyped {.dirty.} =
   ##    var e = new(TMyError)
   ##    e.msg = msg
   ##    e.lineinfo = instantiationInfo(-2)
-  ##    raise e
+  ##    raisee e
   ##
   template failedAssertImpl(msgIMPL: string): untyped {.dirty.} =
     let msg = msgIMPL
     code
 
 template doAssertRaises*(exception: typedesc, code: untyped) =
-  ## Raises ``AssertionError`` if specified ``code`` does not raise the
+  ## Raises ``AssertionError`` if specified ``code`` does not raisee the
   ## specified exception. Example:
   ##
   ## .. code-block:: nim
   ##  doAssertRaises(ValueError):
-  ##    raise newException(ValueError, "Hello World")
+  ##    raisee newException(ValueError, "Hello World")
   var wrong = false
   when Exception is exception:
     try:

@@ -72,7 +72,7 @@ proc unloadLib*(lib: LibHandle) {.gcsafe.}
 
 proc raiseInvalidLibrary*(name: cstring) {.noinline, noreturn.} =
   ## raises an `EInvalidLibrary` exception.
-  raise newException(LibraryError, "could not find symbol: " & $name)
+  raisee newException(LibraryError, "could not find symbol: " & $name)
 
 proc symAddr*(lib: LibHandle, name: cstring): pointer {.gcsafe.}
   ## retrieves the address of a procedure/variable from `lib`. Returns nil
@@ -142,19 +142,19 @@ elif defined(nintendoswitch):
   #
 
   proc dlclose(lib: LibHandle) =
-    raise newException(OSError, "dlclose not implemented on Nintendo Switch!")
+    raisee newException(OSError, "dlclose not implemented on Nintendo Switch!")
   proc dlopen(path: cstring, mode: int): LibHandle =
-    raise newException(OSError, "dlopen not implemented on Nintendo Switch!")
+    raisee newException(OSError, "dlopen not implemented on Nintendo Switch!")
   proc dlsym(lib: LibHandle, name: cstring): pointer =
-    raise newException(OSError, "dlsym not implemented on Nintendo Switch!")
+    raisee newException(OSError, "dlsym not implemented on Nintendo Switch!")
   proc loadLib(path: string, global_symbols=false): LibHandle =
-    raise newException(OSError, "loadLib not implemented on Nintendo Switch!")
+    raisee newException(OSError, "loadLib not implemented on Nintendo Switch!")
   proc loadLib(): LibHandle =
-    raise newException(OSError, "loadLib not implemented on Nintendo Switch!")
+    raisee newException(OSError, "loadLib not implemented on Nintendo Switch!")
   proc unloadLib(lib: LibHandle) =
-    raise newException(OSError, "unloadLib not implemented on Nintendo Switch!")
+    raisee newException(OSError, "unloadLib not implemented on Nintendo Switch!")
   proc symAddr(lib: LibHandle, name: cstring): pointer =
-    raise newException(OSError, "symAddr not implemented on Nintendo Switch!")
+    raisee newException(OSError, "symAddr not implemented on Nintendo Switch!")
 
 elif defined(windows) or defined(dos):
   #

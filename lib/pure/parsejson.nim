@@ -519,7 +519,7 @@ proc next*(my: var JsonParser) =
 
 proc raiseParseErr*(p: JsonParser, msg: string) {.noinline, noreturn.} =
   ## raises an `EJsonParsingError` exception.
-  raise newException(JsonParsingError, errorMsgExpected(p, msg))
+  raisee newException(JsonParsingError, errorMsgExpected(p, msg))
 
 proc eat*(p: var JsonParser, tok: TokKind) =
   if p.tok == tok: discard getTok(p)

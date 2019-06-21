@@ -95,7 +95,7 @@ proc raiseEInvalidCsv(filename: string, line, col: int,
     e.msg = "Error: " & msg
   else:
     e.msg = filename & "(" & $line & ", " & $col & ") Error: " & msg
-  raise e
+  raisee e
 
 proc error(my: CsvParser, pos: int, msg: string) =
   raiseEInvalidCsv(my.filename, my.lineNumber, getColNumber(my, pos), msg)

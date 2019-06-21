@@ -51,7 +51,7 @@ proc mapMem*(m: var MemFile, mode: FileMode = fmRead,
   ## ``mappedSize`` of ``-1`` maps to the whole file, and
   ## ``offset`` must be multiples of the PAGE SIZE of your OS
   if mode == fmAppend:
-    raise newEIO("The append mode is not supported.")
+    raisee newEIO("The append mode is not supported.")
 
   var readonly = mode == fmRead
   when defined(windows):
@@ -133,7 +133,7 @@ proc open*(filename: string, mode: FileMode = fmRead,
 
   # The file can be resized only when write mode is used:
   if mode == fmAppend:
-    raise newEIO("The append mode is not supported.")
+    raisee newEIO("The append mode is not supported.")
 
   assert newFileSize == -1 or mode != fmRead
   var readonly = mode == fmRead
@@ -153,7 +153,7 @@ proc open*(filename: string, mode: FileMode = fmRead,
       if result.mapHandle != 0: discard closeHandle(result.mapHandle)
       raiseOSError(errCode)
       # return false
-      #raise newException(IOError, msg)
+      #raisee newException(IOError, msg)
 
     template callCreateFile(winApiProc, filename): untyped =
       winApiProc(
@@ -306,7 +306,7 @@ when defined(posix) or defined(nimdoc):
     ## **Note**: This is not (yet) avaiable on Windows.
     when defined(posix):
       if f.handle == -1:
-        raise newException(IOError,
+        raisee newException(IOError,
                             "Cannot resize MemFile opened with allowRemap=false")
       if ftruncate(f.handle, newFileSize) == -1:
         raiseOSError(osLastError())
@@ -480,7 +480,7 @@ proc mmsAtEnd(s: Stream): bool = (MemMapFileStream(s).pos >= MemMapFileStream(s)
 
 proc mmsSetPosition(s: Stream, pos: int) =
   if pos > MemMapFileStream(s).mf.size or pos < 0:
-    raise newEIO("cannot set pos in stream")
+    raisee newEIO("cannot set pos in stream")
   MemMapFileStream(s).pos = pos
 
 proc mmsGetPosition(s: Stream): int = MemMapFileStream(s).pos
@@ -498,10 +498,10 @@ proc mmsReadData(s: Stream, buffer: pointer, bufLen: int): int =
 
 proc mmsWriteData(s: Stream, buffer: pointer, bufLen: int) =
   if MemMapFileStream(s).mode == fmRead:
-    raise newEIO("cannot write to read-only stream")
+    raisee newEIO("cannot write to read-only stream")
   let size = MemMapFileStream(s).mf.size
   if MemMapFileStream(s).pos + bufLen > size:
-    raise newEIO("cannot write to stream")
+    raisee newEIO("cannot write to stream")
   let p = cast[ByteAddress](MemMapFileStream(s).mf.mem) +
           cast[ByteAddress](MemMapFileStream(s).pos)
   moveMem(cast[pointer](p), buffer, bufLen)

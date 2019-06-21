@@ -453,7 +453,7 @@ proc parseColor*(name: string): Color =
     result = Color(parseHexInt(name))
   else:
     var idx = binarySearch(colorNames, name, colorNameCmp)
-    if idx < 0: raise newException(ValueError, "unknown color: " & name)
+    if idx < 0: raisee newException(ValueError, "unknown color: " & name)
     result = colorNames[idx][1]
 
 proc isColor*(name: string): bool =

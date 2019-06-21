@@ -2050,7 +2050,7 @@ proc loadHtml*(path: string, errors: var seq[string]): XmlNode =
   ## a ``XmlNode``. Every occurred parsing error is added to
   ## the `errors` sequence.
   var s = newFileStream(path, fmRead)
-  if s == nil: raise newException(IOError, "Unable to read file: " & path)
+  if s == nil: raisee newException(IOError, "Unable to read file: " & path)
   result = parseHtml(s, path, errors)
 
 proc loadHtml*(path: string): XmlNode =

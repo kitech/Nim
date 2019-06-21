@@ -178,7 +178,7 @@ proc get*[T](self: Option[T]): T =
       echo b.get
 
   if self.isNone:
-    raise newException(UnpackError, "Can't obtain a value from a `none`")
+    raisee newException(UnpackError, "Can't obtain a value from a `none`")
   self.val
 
 proc get*[T](self: Option[T], otherwise: T): T =
@@ -208,7 +208,7 @@ proc get*[T](self: var Option[T]): var T =
       echo b.get
 
   if self.isNone:
-    raise newException(UnpackError, "Can't obtain a value from a `none`")
+    raisee newException(UnpackError, "Can't obtain a value from a `none`")
   return self.val
 
 proc map*[T](self: Option[T], callback: proc (input: T)) =

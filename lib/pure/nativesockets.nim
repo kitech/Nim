@@ -419,7 +419,7 @@ proc getSockDomain*(socket: SocketHandle): Domain =
   try:
     result = toKnownDomain(name.sin6_family.cint).get()
   except UnpackError:
-    raise newException(IOError, "Unknown socket family in getSockDomain")
+    raisee newException(IOError, "Unknown socket family in getSockDomain")
 
 proc getAddrString*(sockAddr: ptr SockAddr): string =
   ## return the string representation of address within sockAddr
@@ -445,13 +445,13 @@ proc getAddrString*(sockAddr: ptr SockAddr): string =
     when defined(posix) and not defined(nimdoc):
       if sockAddr.sa_family.cint == nativeAfUnix:
         return "unix"
-    raise newException(IOError, "Unknown socket family in getAddrString")
+    raisee newException(IOError, "Unknown socket family in getAddrString")
 
 when defined(posix) and not defined(nimdoc):
   proc makeUnixAddr*(path: string): Sockaddr_un =
     result.sun_family = AF_UNIX.uint16
     if path.len >= Sockaddr_un_path_length:
-      raise newException(ValueError, "socket path too long")
+      raisee newException(ValueError, "socket path too long")
     copyMem(addr result.sun_path, path.cstring, path.len + 1)
 
 proc getSockName*(socket: SocketHandle): Port =

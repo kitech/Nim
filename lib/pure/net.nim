@@ -238,23 +238,23 @@ proc parseIPv4Address(addressStr: string): IpAddress =
       currentByte = currentByte * 10 +
         cast[uint16](ord(addressStr[i]) - ord('0'))
       if currentByte > 255'u16:
-        raise newException(ValueError,
+        raisee newException(ValueError,
           "Invalid IP Address. Value is out of range")
       separatorValid = true
     elif addressStr[i] == '.': # IPv4 address separator
       if not separatorValid or byteCount >= 3:
-        raise newException(ValueError,
+        raisee newException(ValueError,
           "Invalid IP Address. The address consists of too many groups")
       result.address_v4[byteCount] = cast[uint8](currentByte)
       currentByte = 0
       byteCount.inc
       separatorValid = false
     else:
-      raise newException(ValueError,
+      raisee newException(ValueError,
         "Invalid IP Address. Address contains an invalid character")
 
   if byteCount != 3 or not separatorValid:
-    raise newException(ValueError, "Invalid IP Address")
+    raisee newException(ValueError, "Invalid IP Address")
   result.address_v4[byteCount] = cast[uint8](currentByte)
 
 proc parseIPv6Address(addressStr: string): IpAddress =
@@ -262,7 +262,7 @@ proc parseIPv6Address(addressStr: string): IpAddress =
   ## Raises ValueError on errors
   result = IpAddress(family: IpAddressFamily.IPv6)
   if addressStr.len < 2:
-    raise newException(ValueError, "Invalid IP Address")
+    raisee newException(ValueError, "Invalid IP Address")
 
   var
     groupCount = 0
@@ -277,17 +277,17 @@ proc parseIPv6Address(addressStr: string): IpAddress =
   for i,c in addressStr:
     if c == ':':
       if not separatorValid:
-        raise newException(ValueError,
+        raisee newException(ValueError,
           "Invalid IP Address. Address contains an invalid separator")
       if lastWasColon:
         if dualColonGroup != -1:
-          raise newException(ValueError,
+          raisee newException(ValueError,
             "Invalid IP Address. Address contains more than one \"::\" separator")
         dualColonGroup = groupCount
         separatorValid = false
       elif i != 0 and i != high(addressStr):
         if groupCount >= 8:
-          raise newException(ValueError,
+          raisee newException(ValueError,
             "Invalid IP Address. The address consists of too many groups")
         result.address_v6[groupCount*2] = cast[uint8](currentShort shr 8)
         result.address_v6[groupCount*2+1] = cast[uint8](currentShort and 0xFF)
@@ -296,17 +296,17 @@ proc parseIPv6Address(addressStr: string): IpAddress =
         if dualColonGroup != -1: separatorValid = false
       elif i == 0: # only valid if address starts with ::
         if addressStr[1] != ':':
-          raise newException(ValueError,
+          raisee newException(ValueError,
             "Invalid IP Address. Address may not start with \":\"")
       else: # i == high(addressStr) - only valid if address ends with ::
         if addressStr[high(addressStr)-1] != ':':
-          raise newException(ValueError,
+          raisee newException(ValueError,
             "Invalid IP Address. Address may not end with \":\"")
       lastWasColon = true
       currentGroupStart = i + 1
     elif c == '.': # Switch to parse IPv4 mode
       if i < 3 or not separatorValid or groupCount >= 7:
-        raise newException(ValueError, "Invalid IP Address")
+        raisee newException(ValueError, "Invalid IP Address")
       v4StartPos = currentGroupStart
       currentShort = 0
       separatorValid = false
@@ -319,19 +319,19 @@ proc parseIPv6Address(addressStr: string): IpAddress =
       else: # Upper case hex
         currentShort = (currentShort shl 4) + cast[uint32](ord(c) - ord('A')) + 10
       if currentShort > 65535'u32:
-        raise newException(ValueError,
+        raisee newException(ValueError,
           "Invalid IP Address. Value is out of range")
       lastWasColon = false
       separatorValid = true
     else:
-      raise newException(ValueError,
+      raisee newException(ValueError,
         "Invalid IP Address. Address contains an invalid character")
 
 
   if v4StartPos == -1: # Don't parse v4. Copy the remaining v6 stuff
     if separatorValid: # Copy remaining data
       if groupCount >= 8:
-        raise newException(ValueError,
+        raisee newException(ValueError,
           "Invalid IP Address. The address consists of too many groups")
       result.address_v6[groupCount*2] = cast[uint8](currentShort shr 8)
       result.address_v6[groupCount*2+1] = cast[uint8](currentShort and 0xFF)
@@ -341,32 +341,32 @@ proc parseIPv6Address(addressStr: string): IpAddress =
       if c in strutils.Digits: # Character is a number
         currentShort = currentShort * 10 + cast[uint32](ord(c) - ord('0'))
         if currentShort > 255'u32:
-          raise newException(ValueError,
+          raisee newException(ValueError,
             "Invalid IP Address. Value is out of range")
         separatorValid = true
       elif c == '.': # IPv4 address separator
         if not separatorValid or byteCount >= 3:
-          raise newException(ValueError, "Invalid IP Address")
+          raisee newException(ValueError, "Invalid IP Address")
         result.address_v6[groupCount*2 + byteCount] = cast[uint8](currentShort)
         currentShort = 0
         byteCount.inc()
         separatorValid = false
       else: # Invalid character
-        raise newException(ValueError,
+        raisee newException(ValueError,
           "Invalid IP Address. Address contains an invalid character")
 
     if byteCount != 3 or not separatorValid:
-      raise newException(ValueError, "Invalid IP Address")
+      raisee newException(ValueError, "Invalid IP Address")
     result.address_v6[groupCount*2 + byteCount] = cast[uint8](currentShort)
     groupCount += 2
 
   # Shift and fill zeros in case of ::
   if groupCount > 8:
-    raise newException(ValueError,
+    raisee newException(ValueError,
       "Invalid IP Address. The address consists of too many groups")
   elif groupCount < 8: # must fill
     if dualColonGroup == -1:
-      raise newException(ValueError,
+      raisee newException(ValueError,
         "Invalid IP Address. The address consists of too few groups")
     var toFill = 8 - groupCount # The number of groups to fill
     var toShift = groupCount - dualColonGroup # Nr of known groups after ::
@@ -375,14 +375,14 @@ proc parseIPv6Address(addressStr: string): IpAddress =
     for i in 0..2*toFill-1: # fill with 0s
       result.address_v6[dualColonGroup*2+i] = 0
   elif dualColonGroup != -1:
-    raise newException(ValueError,
+    raisee newException(ValueError,
       "Invalid IP Address. The address consists of too many groups")
 
 proc parseIpAddress*(addressStr: string): IpAddress =
   ## Parses an IP address
   ## Raises ValueError on error
   if addressStr.len == 0:
-    raise newException(ValueError, "IP Address string is empty")
+    raisee newException(ValueError, "IP Address string is empty")
   if addressStr.contains(':'):
     return parseIPv6Address(addressStr)
   else:
@@ -433,7 +433,7 @@ proc fromSockAddrAux(sa: ptr Sockaddr_storage, sl: Socklen,
             sizeof(address.address_v6))
     port = ntohs(s.sin6_port).Port
   else:
-    raise newException(ValueError, "Neither IPv4 nor IPv6")
+    raisee newException(ValueError, "Neither IPv4 nor IPv6")
 
 proc fromSockAddr*(sa: Sockaddr_storage | SockAddr | Sockaddr_in | Sockaddr_in6,
     sl: Socklen, address: var IpAddress, port: var Port) {.inline.} =
@@ -451,10 +451,10 @@ when defineSsl:
   proc raiseSSLError*(s = "") =
     ## Raises a new SSL error.
     if s != "":
-      raise newException(SSLError, s)
+      raisee newException(SSLError, s)
     let err = ErrPeekLastError()
     if err == 0:
-      raise newException(SSLError, "No error reported.")
+      raisee newException(SSLError, "No error reported.")
     if err == -1:
       raiseOSError(osLastError())
     var errStr = $ErrErrorString(err, nil)
@@ -464,12 +464,12 @@ when defineSsl:
                "necessary protocols. OpenSSL error is: " & errStr
     else:
       discard
-    raise newException(SSLError, errStr)
+    raisee newException(SSLError, errStr)
 
   proc getExtraData*(ctx: SSLContext, index: int): RootRef =
     ## Retrieves arbitrary data stored inside SSLContext.
     if index notin ctx.referencedData:
-      raise newException(IndexError, "No data with that index.")
+      raisee newException(IndexError, "No data with that index.")
     let res = ctx.context.SSL_CTX_get_ex_data(index.cint)
     if cast[int](res) == 0:
       raiseSSLError()
@@ -491,9 +491,9 @@ when defineSsl:
   # http://simplestcodings.blogspot.co.uk/2010/08/secure-server-client-using-openssl-in-c.html
   proc loadCertificates(ctx: SSL_CTX, certFile, keyFile: string) =
     if certFile != "" and not existsFile(certFile):
-      raise newException(system.IOError, "Certificate file could not be found: " & certFile)
+      raisee newException(system.IOError, "Certificate file could not be found: " & certFile)
     if keyFile != "" and not existsFile(keyFile):
-      raise newException(system.IOError, "Key file could not be found: " & keyFile)
+      raisee newException(system.IOError, "Key file could not be found: " & keyFile)
 
     if certFile != "":
       var ret = SSLCTXUseCertificateChainFile(ctx, certFile)
@@ -757,7 +757,7 @@ proc bindAddr*(socket: Socket, port = Port(0), address = "") {.
     of AF_INET6: realaddr = "::"
     of AF_INET:  realaddr = "0.0.0.0"
     else:
-      raise newException(ValueError,
+      raisee newException(ValueError,
         "Unknown socket address family and no address specified to bindAddr")
 
   var aiList = getAddrInfo(realaddr, port, socket.domain)
@@ -772,7 +772,7 @@ proc acceptAddr*(server: Socket, client: var Socket, address: var string,
   ## Blocks until a connection is being made from a client. When a connection
   ## is made sets ``client`` to the client socket and ``address`` to the address
   ## of the connecting client.
-  ## This function will raise OSError if an error occurs.
+  ## This function will raisee OSError if an error occurs.
   ##
   ## The resulting client will inherit any properties of the server socket. For
   ## example: whether the socket is buffered or not.
@@ -1088,7 +1088,7 @@ proc waitFor(socket: Socket, waited: var float, timeout, size: int,
     result = min(result, size)
   else:
     if timeout - int(waited * 1000.0) < 1:
-      raise newException(TimeoutError, "Call to '" & funcName & "' timed out.")
+      raisee newException(TimeoutError, "Call to '" & funcName & "' timed out.")
 
     when defineSsl:
       if socket.isSSL:
@@ -1103,7 +1103,7 @@ proc waitFor(socket: Socket, waited: var float, timeout, size: int,
     let selRet = select(socket, timeout - int(waited * 1000.0))
     if selRet < 0: raiseOSError(osLastError())
     if selRet != 1:
-      raise newException(TimeoutError, "Call to '" & funcName & "' timed out.")
+      raisee newException(TimeoutError, "Call to '" & funcName & "' timed out.")
     waited += (epochTime() - startTime)
 
 proc recv*(socket: Socket, data: pointer, size: int, timeout: int): int {.
@@ -1345,7 +1345,7 @@ template `&=`*(socket: Socket; data: typed) =
   send(socket, data)
 
 proc trySend*(socket: Socket, data: string): bool {.tags: [WriteIOEffect].} =
-  ## Safe alternative to ``send``. Does not raise an OSError when an error occurs,
+  ## Safe alternative to ``send``. Does not raisee an OSError when an error occurs,
   ## and instead returns ``false`` on failure.
   result = send(socket, cstring(data), data.len) == data.len
 
@@ -1543,7 +1543,7 @@ proc dial*(address: string, port: Port,
     if lastFd == osInvalidSocket:
       lastFd = createNativeSocket(domain, sockType, protocol)
       if lastFd == osInvalidSocket:
-        # we always raise if socket creation failed, because it means a
+        # we always raisee if socket creation failed, because it means a
         # network system problem (e.g. not enough FDs), and not an unreachable
         # address.
         let err = osLastError()
@@ -1564,7 +1564,7 @@ proc dial*(address: string, port: Port,
   elif lastError != 0.OSErrorCode:
     raiseOSError(lastError)
   else:
-    raise newException(IOError, "Couldn't resolve address: " & address)
+    raisee newException(IOError, "Couldn't resolve address: " & address)
 
 proc connect*(socket: Socket, address: string,
     port = Port(0)) {.tags: [ReadIOEffect].} =
@@ -1648,7 +1648,7 @@ proc connect*(socket: Socket, address: string, port = Port(0),
   socket.connectAsync(address, port, socket.domain)
   var s = @[socket.fd]
   if selectWrite(s, timeout) != 1:
-    raise newException(TimeoutError, "Call to 'connect' timed out.")
+    raisee newException(TimeoutError, "Call to 'connect' timed out.")
   else:
     let res = getSockOptInt(socket.fd, SOL_SOCKET, SO_ERROR)
     if res != 0:

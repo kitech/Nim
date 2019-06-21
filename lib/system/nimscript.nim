@@ -34,25 +34,25 @@ proc listFiles*(dir: string): seq[string] =
   builtin
 
 proc removeDir(dir: string) {.
-  tags: [ReadIOEffect, WriteIOEffect], raises: [OSError].} = builtin
+  tags: [ReadIOEffect, WriteIOEffect], raises: [].} = builtin
 proc removeFile(dir: string) {.
-  tags: [ReadIOEffect, WriteIOEffect], raises: [OSError].} = builtin
+  tags: [ReadIOEffect, WriteIOEffect], raises: [].} = builtin
 proc moveFile(src, dest: string) {.
-  tags: [ReadIOEffect, WriteIOEffect], raises: [OSError].} = builtin
+  tags: [ReadIOEffect, WriteIOEffect], raises: [].} = builtin
 proc moveDir(src, dest: string) {.
-  tags: [ReadIOEffect, WriteIOEffect], raises: [OSError].} = builtin
+  tags: [ReadIOEffect, WriteIOEffect], raises: [].} = builtin
 proc copyFile(src, dest: string) {.
-  tags: [ReadIOEffect, WriteIOEffect], raises: [OSError].} = builtin
+  tags: [ReadIOEffect, WriteIOEffect], raises: [].} = builtin
 proc copyDir(src, dest: string) {.
-  tags: [ReadIOEffect, WriteIOEffect], raises: [OSError].} = builtin
-proc createDir(dir: string) {.tags: [WriteIOEffect], raises: [OSError].} =
+  tags: [ReadIOEffect, WriteIOEffect], raises: [].} = builtin
+proc createDir(dir: string) {.tags: [WriteIOEffect], raises: [].} =
   builtin
 proc getError: string = builtin
 proc setCurrentDir(dir: string) = builtin
 proc getCurrentDir*(): string =
   ## Retrieves the current working directory.
   builtin
-proc rawExec(cmd: string): int {.tags: [ExecIOEffect], raises: [OSError].} =
+proc rawExec(cmd: string): int {.tags: [ExecIOEffect], raises: [].} =
   builtin
 
 proc warningImpl(arg, orig: string) = discard
@@ -185,7 +185,7 @@ var
 
 template checkError(exc: untyped): untyped =
   let err = getError()
-  if err.len > 0: raise newException(exc, err)
+  if err.len > 0: quit(err) # raisee newException(exc, err)
 
 template checkOsError =
   checkError(OSError)
@@ -196,44 +196,44 @@ template log(msg: string, body: untyped) =
   if mode != ScriptMode.WhatIf:
     body
 
-proc rmDir*(dir: string) {.raises: [OSError].} =
+proc rmDir*(dir: string) {.raises: [].} =
   ## Removes the directory `dir`.
   log "rmDir: " & dir:
     removeDir dir
     checkOsError()
 
-proc rmFile*(file: string) {.raises: [OSError].} =
+proc rmFile*(file: string) {.raises: [].} =
   ## Removes the `file`.
   log "rmFile: " & file:
     removeFile file
     checkOsError()
 
-proc mkDir*(dir: string) {.raises: [OSError].} =
+proc mkDir*(dir: string) {.raises: [].} =
   ## Creates the directory `dir` including all necessary subdirectories. If
   ## the directory already exists, no error is raised.
   log "mkDir: " & dir:
     createDir dir
     checkOsError()
 
-proc mvFile*(`from`, to: string) {.raises: [OSError].} =
+proc mvFile*(`from`, to: string) {.raises: [].} =
   ## Moves the file `from` to `to`.
   log "mvFile: " & `from` & ", " & to:
     moveFile `from`, to
     checkOsError()
 
-proc mvDir*(`from`, to: string) {.raises: [OSError].} =
+proc mvDir*(`from`, to: string) {.raises: [].} =
   ## Moves the dir `from` to `to`.
   log "mvDir: " & `from` & ", " & to:
     moveDir `from`, to
     checkOsError()
 
-proc cpFile*(`from`, to: string) {.raises: [OSError].} =
+proc cpFile*(`from`, to: string) {.raises: [].} =
   ## Copies the file `from` to `to`.
   log "cpFile: " & `from` & ", " & to:
     copyFile `from`, to
     checkOsError()
 
-proc cpDir*(`from`, to: string) {.raises: [OSError].} =
+proc cpDir*(`from`, to: string) {.raises: [].} =
   ## Copies the dir `from` to `to`.
   log "cpDir: " & `from` & ", " & to:
     copyDir `from`, to
@@ -243,11 +243,11 @@ proc exec*(command: string) =
   ## Executes an external process.
   log "exec: " & command:
     if rawExec(command) != 0:
-      raise newException(OSError, "FAILED: " & command)
+      raisee newException(OSError, "FAILED: " & command)
     checkOsError()
 
 proc exec*(command: string, input: string, cache = "") {.
-  raises: [OSError], tags: [ExecIOEffect].} =
+  raises: [], tags: [ExecIOEffect].} =
   ## Executes an external process.
   log "exec: " & command:
     echo staticExec(command, input, cache)
@@ -258,7 +258,7 @@ proc selfExec*(command: string) =
   let c = selfExe() & " " & command
   log "exec: " & c:
     if rawExec(c) != 0:
-      raise newException(OSError, "FAILED: " & c)
+      raisee newException(OSError, "FAILED: " & c)
     checkOsError()
 
 proc put*(key, value: string) =
@@ -296,7 +296,7 @@ proc thisDir*(): string =
   ## ``currentSourcePath`` resolves symlinks, unlike ``thisDir``).
   builtin
 
-proc cd*(dir: string) {.raises: [OSError].} =
+proc cd*(dir: string) {.raises: [].} =
   ## Changes the current directory.
   ##
   ## The change is permanent for the rest of the execution, since this is just
@@ -341,20 +341,20 @@ proc cppDefine*(define: string) =
   builtin
 
 proc stdinReadLine(): TaintedString {.
-  tags: [ReadIOEffect], raises: [IOError].} =
+  tags: [ReadIOEffect], raises: [].} =
   builtin
 
 proc stdinReadAll(): TaintedString {.
-  tags: [ReadIOEffect], raises: [IOError].} =
+  tags: [ReadIOEffect], raises: [].} =
   builtin
 
-proc readLineFromStdin*(): TaintedString {.raises: [IOError].} =
+proc readLineFromStdin*(): TaintedString {.raises: [].} =
   ## Reads a line of data from stdin - blocks until \n or EOF which happens when stdin is closed
   log "readLineFromStdin":
     result = stdinReadLine()
     checkError(EOFError)
 
-proc readAllFromStdin*(): TaintedString {.raises: [IOError].} =
+proc readAllFromStdin*(): TaintedString {.raises: [].} =
   ## Reads all data from stdin - blocks until EOF which happens when stdin is closed
   log "readAllFromStdin":
     result = stdinReadAll()

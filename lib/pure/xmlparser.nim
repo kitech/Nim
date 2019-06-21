@@ -21,7 +21,7 @@ proc raiseInvalidXml(errors: seq[string]) =
   new(e)
   e.msg = errors[0]
   e.errors = errors
-  raise e
+  raisee e
 
 proc addNode(father, son: XmlNode) =
   if son != nil: add(father, son)
@@ -135,7 +135,7 @@ proc loadXml*(path: string, errors: var seq[string]): XmlNode =
   ## a ``XmlNode``. Every occurred parsing error is added to the ``errors``
   ## sequence.
   var s = newFileStream(path, fmRead)
-  if s == nil: raise newException(IOError, "Unable to read file: " & path)
+  if s == nil: raisee newException(IOError, "Unable to read file: " & path)
   result = parseXml(s, path, errors)
 
 proc loadXml*(path: string): XmlNode =

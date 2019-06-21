@@ -49,7 +49,7 @@ proc raiseInvalidRegex(msg: string) {.noinline, noreturn.} =
   var e: ref RegexError
   new(e)
   e.msg = msg
-  raise e
+  raisee e
 
 proc rawCompile(pattern: string, flags: cint): ptr Pcre =
   var

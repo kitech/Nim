@@ -198,7 +198,7 @@ type
     bodyStream*: FutureStream[string]
 
 proc code*(response: Response | AsyncResponse): HttpCode
-           {.raises: [ValueError, OverflowError].} =
+           {.raises: [].} =
   ## Retrieves the specified response's ``HttpCode``.
   ##
   ## Raises a ``ValueError`` if the response's ``status`` does not have a
@@ -268,13 +268,13 @@ proc httpError(msg: string) =
   var e: ref ProtocolError
   new(e)
   e.msg = msg
-  raise e
+  raisee e
 
 proc fileError(msg: string) =
   var e: ref IOError
   new(e)
   e.msg = msg
-  raise e
+  raisee e
 
 proc parseChunks(s: Socket, timeout: int): string =
   result = ""
@@ -427,11 +427,11 @@ proc add*(p: var MultipartData, name, content: string, filename: string = "",
   ## `name`, `filename` or `contentType` contain newline characters.
 
   if {'\c','\L'} in name:
-    raise newException(ValueError, "name contains a newline character")
+    raisee newException(ValueError, "name contains a newline character")
   if {'\c','\L'} in filename:
-    raise newException(ValueError, "filename contains a newline character")
+    raisee newException(ValueError, "filename contains a newline character")
   if {'\c','\L'} in contentType:
-    raise newException(ValueError, "contentType contains a newline character")
+    raisee newException(ValueError, "contentType contains a newline character")
 
   var str = "Content-Disposition: form-data; name=\"" & name & "\""
   if filename.len > 0:
@@ -908,7 +908,7 @@ proc newConnection(client: HttpClient | AsyncHttpClient,
     let isSsl = connectionUrl.scheme.toLowerAscii() == "https"
 
     if isSsl and not defined(ssl):
-      raise newException(HttpRequestError,
+      raisee newException(HttpRequestError,
         "SSL support is not available. Cannot connect over SSL. Compile with -d:ssl to enable.")
 
     if client.connected:
@@ -919,10 +919,10 @@ proc newConnection(client: HttpClient | AsyncHttpClient,
     let port =
       if connectionUrl.port == "":
         if isSsl:
-          nativesockets.Port(443)
+          Port(443)
         else:
-          nativesockets.Port(80)
-      else: nativesockets.Port(connectionUrl.port.parseInt)
+          Port(80)
+      else: Port(connectionUrl.port.parseInt)
 
     when client is HttpClient:
       client.socket = await net.dial(connectionUrl.hostname, port)
@@ -937,7 +937,7 @@ proc newConnection(client: HttpClient | AsyncHttpClient,
             client.socket, handshakeAsClient, connectionUrl.hostname)
         except:
           client.socket.close()
-          raise getCurrentException()
+          raisee getCurrentException()
 
     # If need to CONNECT through proxy
     if url.scheme == "https" and not client.proxy.isNil:
@@ -952,13 +952,13 @@ proc newConnection(client: HttpClient | AsyncHttpClient,
         let proxyResp = await parseResponse(client, false)
 
         if not proxyResp.status.startsWith("200"):
-          raise newException(HttpRequestError,
+          raisee newException(HttpRequestError,
                             "The proxy server rejected a CONNECT request, " &
                             "so a secure connection could not be established.")
         client.sslContext.wrapConnectedSocket(
           client.socket, handshakeAsClient, url.hostname)
       else:
-        raise newException(HttpRequestError,
+        raisee newException(HttpRequestError,
         "SSL support is not available. Cannot connect over SSL. Compile with -d:ssl to enable.")
 
     # May be connected through proxy but remember actual URL being accessed
@@ -984,7 +984,7 @@ proc requestAux(client: HttpClient | AsyncHttpClient, url: string,
   let requestUrl = parseUri(url)
 
   if requestUrl.scheme == "":
-    raise newException(ValueError, "No uri scheme supplied.")
+    raisee newException(ValueError, "No uri scheme supplied.")
 
   when client is AsyncHttpClient:
     if not client.parseBodyFut.isNil:
@@ -1056,7 +1056,7 @@ proc responseContent(resp: Response | AsyncResponse): Future[string] {.multisync
   ## A ``HttpRequestError`` will be raised if the server responds with a
   ## client error (status code 4xx) or a server error (status code 5xx).
   if resp.code.is4xx or resp.code.is5xx:
-    raise newException(HttpRequestError, resp.status)
+    raisee newException(HttpRequestError, resp.status)
   else:
     return await resp.bodyStream.readAll()
 
@@ -1169,7 +1169,7 @@ proc downloadFile*(client: HttpClient, url: string, filename: string) =
   client.bodyStream.close()
 
   if resp.code.is4xx or resp.code.is5xx:
-    raise newException(HttpRequestError, resp.status)
+    raisee newException(HttpRequestError, resp.status)
 
 proc downloadFile*(client: AsyncHttpClient, url: string,
                    filename: string): Future[void] =
@@ -1190,7 +1190,7 @@ proc downloadFile*(client: AsyncHttpClient, url: string,
     file.close()
 
     if resp.code.is4xx or resp.code.is5xx:
-      raise newException(HttpRequestError, resp.status)
+      raisee newException(HttpRequestError, resp.status)
 
   result = newFuture[void]("downloadFile")
   try:

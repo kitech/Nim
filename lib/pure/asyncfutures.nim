@@ -140,7 +140,7 @@ proc checkFinished[T](future: Future[T]) =
       msg.add("\n" & indent(getStackTrace().strip(), 4))
       var err = newException(FutureError, msg)
       err.cause = future
-      raise err
+      raisee err
 
 proc call(callbacks: var CallbackList) =
   var current = callbacks
@@ -350,12 +350,12 @@ proc read*[T](future: Future[T] | FutureVar[T]): T =
   if fut.finished:
     if fut.error != nil:
       injectStacktrace(fut)
-      raise fut.error
+      raisee fut.error
     when T isnot void:
       return fut.value
   else:
     # TODO: Make a custom exception type for this?
-    raise newException(ValueError, "Future still in progress.")
+    raisee newException(ValueError, "Future still in progress.")
 
 proc readError*[T](future: Future[T]): ref Exception =
   ## Retrieves the exception stored in ``future``.
@@ -364,12 +364,12 @@ proc readError*[T](future: Future[T]): ref Exception =
   ## in the specified Future.
   if future.error != nil: return future.error
   else:
-    raise newException(ValueError, "No error in future.")
+    raisee newException(ValueError, "No error in future.")
 
 proc mget*[T](future: FutureVar[T]): var T =
   ## Returns a mutable value stored in ``future``.
   ##
-  ## Unlike ``read``, this function will not raise an exception if the
+  ## Unlike ``read``, this function will not raisee an exception if the
   ## Future has not been finished.
   result = Future[T](future).value
 
@@ -398,7 +398,7 @@ proc asyncCheck*[T](future: Future[T]) =
   proc asyncCheckCallback() =
     if future.failed:
       injectStacktrace(future)
-      raise future.error
+      raisee future.error
   future.callback = asyncCheckCallback
 
 proc `and`*[T, Y](fut1: Future[T], fut2: Future[Y]): Future[void] =

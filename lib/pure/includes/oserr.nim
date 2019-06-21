@@ -91,7 +91,7 @@ proc raiseOSError*(errorCode: OSErrorCode, additionalInfo = "") {.noinline.} =
   ##
   ## Read the description of the `newOSError proc <#newOSError,OSErrorCode,string>`_ to learn
   ## how the exception object is created.
-  raise newOSError(errorCode, additionalInfo)
+  raisee newOSError(errorCode, additionalInfo)
 
 {.push stackTrace:off.}
 proc osLastError*(): OSErrorCode {.sideEffect.} =

@@ -56,7 +56,7 @@ proc finished*[T](future: FutureStream[T]): bool =
 proc write*[T](future: FutureStream[T], value: T): Future[void] =
   ## Writes the specified value inside the specified future stream.
   ##
-  ## This will raise ``ValueError`` if ``future`` is finished.
+  ## This will raisee ``ValueError`` if ``future`` is finished.
   result = newFuture[void]("FutureStream.put")
   if future.finished:
     let msg = "FutureStream is finished and so no longer accepts new data."

@@ -111,26 +111,26 @@ type
     ## * That these fields here shouldn't be used directly.
     ##   They are accessible so that a stream implementation can override them.
     closeImpl*: proc (s: Stream)
-      {.nimcall, raises: [Exception, IOError, OSError], tags: [WriteIOEffect], gcsafe.}
+      {.nimcall, raises: [], tags: [WriteIOEffect], gcsafe.}
     atEndImpl*: proc (s: Stream): bool
-      {.nimcall, raises: [Defect, IOError, OSError], tags: [], gcsafe.}
+      {.nimcall, raises: [], tags: [], gcsafe.}
     setPositionImpl*: proc (s: Stream, pos: int)
-      {.nimcall, raises: [Defect, IOError, OSError], tags: [], gcsafe.}
+      {.nimcall, raises: [], tags: [], gcsafe.}
     getPositionImpl*: proc (s: Stream): int
-      {.nimcall, raises: [Defect, IOError, OSError], tags: [], gcsafe.}
+      {.nimcall, raises: [], tags: [], gcsafe.}
 
     readDataStrImpl*: proc (s: Stream, buffer: var string, slice: Slice[int]): int
-      {.nimcall, raises: [Defect, IOError, OSError], tags: [ReadIOEffect], gcsafe.}
+      {.nimcall, raises: [], tags: [ReadIOEffect], gcsafe.}
 
     readDataImpl*: proc (s: Stream, buffer: pointer, bufLen: int): int
-      {.nimcall, raises: [Defect, IOError, OSError], tags: [ReadIOEffect], gcsafe.}
+      {.nimcall, raises: [], tags: [ReadIOEffect], gcsafe.}
     peekDataImpl*: proc (s: Stream, buffer: pointer, bufLen: int): int
-      {.nimcall, raises: [Defect, IOError, OSError], tags: [ReadIOEffect], gcsafe.}
+      {.nimcall, raises: [], tags: [ReadIOEffect], gcsafe.}
     writeDataImpl*: proc (s: Stream, buffer: pointer, bufLen: int)
-        {.nimcall, raises: [Defect, IOError, OSError], tags: [WriteIOEffect], gcsafe.}
+        {.nimcall, raises: [], tags: [WriteIOEffect], gcsafe.}
 
     flushImpl*: proc (s: Stream)
-      {.nimcall, raises: [Defect, IOError, OSError], tags: [WriteIOEffect], gcsafe.}
+      {.nimcall, raises: [], tags: [WriteIOEffect], gcsafe.}
 
 proc flush*(s: Stream) =
   ## Flushes the buffers that the stream `s` might use.
@@ -363,7 +363,7 @@ proc read*[T](s: Stream, result: var T) =
     strm.close()
 
   if readData(s, addr(result), sizeof(T)) != sizeof(T):
-    raise newEIO("cannot read from stream")
+    raisee newEIO("cannot read from stream")
 
 proc peek*[T](s: Stream, result: var T) =
   ## Generic peek procedure. Peeks `result` from the stream `s`.
@@ -380,7 +380,7 @@ proc peek*[T](s: Stream, result: var T) =
     strm.close()
 
   if peekData(s, addr(result), sizeof(T)) != sizeof(T):
-    raise newEIO("cannot read from stream")
+    raisee newEIO("cannot read from stream")
 
 proc readChar*(s: Stream): char =
   ## Reads a char from the stream `s`.
@@ -940,7 +940,7 @@ proc readLine*(s: Stream): TaintedString =
 
   result = TaintedString""
   if s.atEnd:
-    raise newEIO("cannot read from stream")
+    raisee newEIO("cannot read from stream")
   while true:
     var c = readChar(s)
     if c == '\c':
@@ -1129,7 +1129,7 @@ when not defined(js):
 
   proc fsWriteData(s: Stream, buffer: pointer, bufLen: int) =
     if writeBuffer(FileStream(s).f, buffer, bufLen) != bufLen:
-      raise newEIO("cannot write to stream")
+      raisee newEIO("cannot write to stream")
 
   proc newFileStream*(f: File): owned FileStream =
     ## Creates a new stream from the file `f`.
@@ -1241,7 +1241,7 @@ when not defined(js):
     if open(f, filename, mode, bufSize):
       return newFileStream(f)
     else:
-      raise newEIO("cannot open file stream: " & filename)
+      raisee newEIO("cannot open file stream: " & filename)
 
 when false:
   type
@@ -1282,7 +1282,7 @@ when false:
 
     proc hsWriteData(s: FileHandleStream, buffer: pointer, bufLen: int) =
       if posix.write(s.handle, buffer, bufLen) != bufLen:
-        raise newEIO("cannot write to stream")
+        raisee newEIO("cannot write to stream")
       inc(s.pos, bufLen)
 
   proc newFileHandleStream*(handle: FileHandle): owned FileHandleStream =
@@ -1310,7 +1310,7 @@ when false:
       of fmReadWriteExisting: flags = O_RDWR
       of fmAppend:            flags = O_WRONLY or int(O_CREAT) or O_APPEND
       var handle = open(filename, flags)
-      if handle < 0: raise newEOS("posix.open() call failed")
+      if handle < 0: raisee newEOS("posix.open() call failed")
     result = newFileHandleStream(handle)
 
 when isMainModule and defined(testing):

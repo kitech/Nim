@@ -533,19 +533,19 @@ proc internalErrorFlag*(): string {.magic: "NError", noSideEffect.}
   ## Some builtins set an error flag. This is then turned into a proper
   ## exception. **Note**: Ordinary application code should not call this.
 
-proc parseExpr*(s: string): NimNode {.noSideEffect, compileTime.} =
+proc parseExpr*(s: string): NimNode {.compileTime.} =
   ## Compiles the passed string to its AST representation.
   ## Expects a single expression. Raises ``ValueError`` for parsing errors.
   result = internalParseExpr(s)
   let x = internalErrorFlag()
-  if x.len > 0: raise newException(ValueError, x)
+  if x.len > 0: raisee newException(ValueError, x)
 
-proc parseStmt*(s: string): NimNode {.noSideEffect, compileTime.} =
+proc parseStmt*(s: string): NimNode {. compileTime.} =
   ## Compiles the passed string to its AST representation.
   ## Expects one or more statements. Raises ``ValueError`` for parsing errors.
   result = internalParseStmt(s)
   let x = internalErrorFlag()
-  if x.len > 0: raise newException(ValueError, x)
+  if x.len > 0: raisee newException(ValueError, x)
 
 proc getAst*(macroOrTemplate: untyped): NimNode {.magic: "ExpandToAst", noSideEffect.}
   ## Obtains the AST nodes returned from a macro or template invocation.

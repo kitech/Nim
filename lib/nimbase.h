@@ -27,7 +27,7 @@ __clang__
 
 /*
    This definition exists to provide support for using the LLVM ASAN (Address SANitizer) tooling with Nim. This
-   should only be used to mark implementations of the GC system that raise false flags with the ASAN tooling, or
+   should only be used to mark implementations of the GC system that raisee false flags with the ASAN tooling, or
    for functions that are hot and need to be disabled for performance reasons. Based on the official ASAN
    documentation, both the clang and gcc compilers are supported. In addition to that, a check is performed to
    verify that the necessary attribute is supported by the compiler.

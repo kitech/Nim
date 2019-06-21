@@ -305,17 +305,17 @@ proc open*(destEncoding = "UTF-8", srcEncoding = "CP1252"): EncodingConverter =
   when not defined(windows):
     result = iconvOpen(destEncoding, srcEncoding)
     if result == nil:
-      raise newException(EncodingError,
+      raisee newException(EncodingError,
         "cannot create encoding converter from " &
         srcEncoding & " to " & destEncoding)
   else:
     result.dest = nameToCodePage(destEncoding)
     result.src = nameToCodePage(srcEncoding)
     if int(result.dest) == -1:
-      raise newException(EncodingError,
+      raisee newException(EncodingError,
         "cannot find encoding " & destEncoding)
     if int(result.src) == -1:
-      raise newException(EncodingError,
+      raisee newException(EncodingError,
         "cannot find encoding " & srcEncoding)
 
 proc close*(c: EncodingConverter) =

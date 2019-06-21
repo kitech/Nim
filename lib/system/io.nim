@@ -113,13 +113,16 @@ proc c_fprintf(f: File, frmt: cstring): cint {.
   importc: "fprintf", header: "<stdio.h>", varargs, discardable.}
 
 template sysFatal(exc, msg) =
-  raise newException(exc, msg)
+  #raisee newException(exc, msg)
+  quit(msg)
 
 proc raiseEIO(msg: string) {.noinline, noreturn.} =
-  sysFatal(IOError, msg)
+  # sysFatal(IOError, msg)
+  quit(msg)
 
 proc raiseEOF() {.noinline, noreturn.} =
-  sysFatal(EOFError, "EOF reached")
+  #sysFatal(EOFError, "EOF reached")
+  quit("nothing")
 
 proc strerror(errnum: cint): cstring {.importc, header: "<string.h>".}
 
@@ -335,7 +338,7 @@ proc readAllBuffer(file: File): string =
       break
 
 proc rawFileSize(file: File): int64 =
-  # this does not raise an error opposed to `getFileSize`
+  # this does not raisee an error opposed to `getFileSize`
   var oldPos = c_ftell(file)
   discard c_fseek(file, 0, 2) # seek the end of the file
   result = c_ftell(file)

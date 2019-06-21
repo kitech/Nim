@@ -412,7 +412,7 @@ proc parseStandardFormatSpecifier*(s: string; start = 0;
     inc i
   result.endPosition = i
   if i != s.len and not ignoreUnknownSuffix:
-    raise newException(ValueError,
+    raisee newException(ValueError,
       "invalid format string, cannot parse: " & s[i..^1])
 
 proc formatValue*(result: var string; value: SomeInteger; specifier: string) =
@@ -430,7 +430,7 @@ proc formatValue*(result: var string; value: SomeInteger; specifier: string) =
   of 'b': radix = 2
   of 'o': radix = 8
   else:
-    raise newException(ValueError,
+    raisee newException(ValueError,
       "invalid type in format string for number, expected one " &
       " of 'x', 'X', 'b', 'd', 'o' but got: " & spec.typ)
   result.add formatInt(value, radix, spec)
@@ -454,7 +454,7 @@ proc formatValue*(result: var string; value: SomeFloat; specifier: string) =
     fmode = ffDefault
   of '\0': discard
   else:
-    raise newException(ValueError,
+    raisee newException(ValueError,
       "invalid type in format string for number, expected one " &
       " of 'e', 'E', 'f', 'F', 'g', 'G' but got: " & spec.typ)
 
@@ -501,7 +501,7 @@ proc formatValue*(result: var string; value: string; specifier: string) =
   case spec.typ
   of 's', '\0': discard
   else:
-    raise newException(ValueError,
+    raisee newException(ValueError,
       "invalid type in format string for string, expected 's', but got " &
       spec.typ)
   if spec.precision != -1:

@@ -493,7 +493,7 @@ when not defined(useNimRtl):
     inc(gch.recGcLock)
   proc GC_enable() =
     if gch.recGcLock <= 0:
-      raise newException(AssertionError,
+      raisee newException(AssertionError,
           "API usage error: GC_enable called but GC is already enabled")
     dec(gch.recGcLock)
 

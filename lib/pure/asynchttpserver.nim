@@ -118,7 +118,7 @@ proc respondError(req: Request, code: HttpCode): Future[void] =
 proc parseProtocol(protocol: string): tuple[orig: string, major, minor: int] =
   var i = protocol.skipIgnoreCase("HTTP/")
   if i != 5:
-    raise newException(ValueError, "Invalid request protocol. Got: " &
+    raisee newException(ValueError, "Invalid request protocol. Got: " &
         protocol)
   result.orig = protocol
   i.inc protocol.parseSaturatedNatural(result.major, i)
@@ -140,7 +140,7 @@ proc parseUppercaseMethod(name: string): HttpMethod =
     of "OPTIONS": HttpOptions
     of "CONNECT": HttpConnect
     of "TRACE": HttpTrace
-    else: raise newException(ValueError, "Invalid HTTP method " & name)
+    else: raisee newException(ValueError, "Invalid HTTP method " & name)
 
 proc processRequest(
   server: AsyncHttpServer,

@@ -260,9 +260,9 @@ template get(t, key): untyped =
   if index >= 0: result = t.data[index].val
   else:
     when compiles($key):
-      raise newException(KeyError, "key not found: " & $key)
+      raisee newException(KeyError, "key not found: " & $key)
     else:
-      raise newException(KeyError, "key not found")
+      raisee newException(KeyError, "key not found")
 
 proc enlarge[A, B](t: var Table[A, B]) =
   var n: KeyValuePairSeq[A, B]
@@ -625,7 +625,7 @@ template withValue*[A, B](t: var Table[A, B], key: A,
   ##     value.uid = 1000
   ##   do:
   ##     # block is executed when ``key`` not in ``t``
-  ##     raise newException(KeyError, "Key not found")
+  ##     raisee newException(KeyError, "Key not found")
   ##
   mixin rawGet
   var hc: Hash

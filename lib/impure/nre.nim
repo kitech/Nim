@@ -236,7 +236,7 @@ proc getinfo[T](pattern: Regex, opt: cint): T =
 
   if retcode < 0:
     # XXX Error message that doesn't expose implementation details
-    raise newException(FieldError, "Invalid getinfo for $1, errno $2" % [$opt, $retcode])
+    raisee newException(FieldError, "Invalid getinfo for $1, errno $2" % [$opt, $retcode])
 
 # Regex accessors {{{
 proc captureCount*(pattern: Regex): int =
@@ -282,7 +282,7 @@ func contains*(pattern: Captures, i: int): bool =
 func `[]`*(pattern: CaptureBounds, i: int): HSlice[int, int] =
   let pattern = RegexMatch(pattern)
   if not (i in pattern.captureBounds):
-    raise newException(IndexError, "Group '" & $i & "' was not captured")
+    raisee newException(IndexError, "Group '" & $i & "' was not captured")
 
   let bounds = pattern.pcreMatchBounds[i + 1]
   int(bounds.a)..int(bounds.b-1)
@@ -311,7 +311,7 @@ func contains*(pattern: Captures, name: string): bool =
 
 func checkNamedCaptured(pattern: RegexMatch, name: string): void =
   if not (name in pattern.captureBounds):
-    raise newException(KeyError, "Group '" & name & "' was not captured")
+    raisee newException(KeyError, "Group '" & name & "' was not captured")
 
 func `[]`*(pattern: CaptureBounds, name: string): HSlice[int, int] =
   let pattern = RegexMatch(pattern)
@@ -476,7 +476,7 @@ proc initRegex(pattern: string, flags: int, study = true): Regex =
                                 addr errOffset, nil)
   if result.pcreObj == nil:
     # failed to compile
-    raise SyntaxError(msg: $errorMsg, pos: errOffset, pattern: pattern)
+    raisee SyntaxError(msg: $errorMsg, pos: errOffset, pattern: pattern)
 
   if study:
     var options: cint = 0
@@ -486,7 +486,7 @@ proc initRegex(pattern: string, flags: int, study = true): Regex =
         options = pcre.STUDY_JIT_COMPILE
     result.pcreExtra = pcre.study(result.pcreObj, options, addr errorMsg)
     if errorMsg != nil:
-      raise StudyError(msg: $errorMsg)
+      raisee StudyError(msg: $errorMsg)
 
   result.captureNameToId = result.getNameToNumberTable()
 
@@ -525,15 +525,15 @@ proc matchImpl(str: string, pattern: Regex, start, endpos: int, flags: int): Opt
     of pcre.ERROR_NOMATCH:
       return none(RegexMatch)
     of pcre.ERROR_NULL:
-      raise newException(AccessViolationError, "Expected non-null parameters")
+      raisee newException(AccessViolationError, "Expected non-null parameters")
     of pcre.ERROR_BADOPTION:
-      raise RegexInternalError(msg : "Unknown pattern flag. Either a bug or " &
+      raisee RegexInternalError(msg : "Unknown pattern flag. Either a bug or " &
         "outdated PCRE.")
     of pcre.ERROR_BADUTF8, pcre.ERROR_SHORTUTF8, pcre.ERROR_BADUTF8_OFFSET:
-      raise InvalidUnicodeError(msg : "Invalid unicode byte sequence",
+      raisee InvalidUnicodeError(msg : "Invalid unicode byte sequence",
         pos : myResult.pcreMatchBounds[0].a)
     else:
-      raise RegexInternalError(msg : "Unknown internal error: " & $execRet)
+      raisee RegexInternalError(msg : "Unknown internal error: " & $execRet)
 
 proc match*(str: string, pattern: Regex, start = 0, endpos = int.high): Option[RegexMatch] =
   ## Like ` ``find(...)`` <#proc-find>`_, but anchored to the start of the

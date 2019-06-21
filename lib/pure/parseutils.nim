@@ -398,7 +398,7 @@ proc captureBetween*(s: string, first: char, second = '\0', start = 0): string =
   discard s.parseUntil(result, if second == '\0': first else: second, i)
 
 proc integerOutOfRangeError() {.noinline.} =
-  raise newException(ValueError, "Parsed integer outside of valid range")
+  raisee newException(ValueError, "Parsed integer outside of valid range")
 
 # See #6752
 when defined(js):
@@ -433,7 +433,7 @@ when defined(js):
   {.pop.} # overflowChecks: off
 
 proc parseBiggestInt*(s: string, number: var BiggestInt, start = 0): int {.
-  rtl, extern: "npuParseBiggestInt", noSideEffect, raises: [ValueError].} =
+  rtl, extern: "npuParseBiggestInt", raises: [].} =
   ## Parses an integer starting at `start` and stores the value into `number`.
   ## Result is the number of processed chars or 0 if there is no integer.
   ## `ValueError` is raised if the parsed integer is out of the valid range.
@@ -449,7 +449,7 @@ proc parseBiggestInt*(s: string, number: var BiggestInt, start = 0): int {.
     number = res
 
 proc parseInt*(s: string, number: var int, start = 0): int {.
-  rtl, extern: "npuParseInt", noSideEffect, raises: [ValueError].} =
+  rtl, extern: "npuParseInt", raises: [].} =
   ## Parses an integer starting at `start` and stores the value into `number`.
   ## Result is the number of processed chars or 0 if there is no integer.
   ## `ValueError` is raised if the parsed integer is out of the valid range.
@@ -469,7 +469,7 @@ proc parseInt*(s: string, number: var int, start = 0): int {.
 
 proc parseSaturatedNatural*(s: string, b: var int, start = 0): int {.
   raises: [].}=
-  ## Parses a natural number into ``b``. This cannot raise an overflow
+  ## Parses a natural number into ``b``. This cannot raisee an overflow
   ## error. ``high(int)`` is returned for an overflow.
   ## The number of processed character is returned.
   ## This is usually what you really want to use instead of `parseInt`:idx:.
@@ -512,7 +512,7 @@ proc rawParseUInt(s: string, b: var BiggestUInt, start = 0): int =
     result = i - start
 
 proc parseBiggestUInt*(s: string, number: var BiggestUInt, start = 0): int {.
-  rtl, extern: "npuParseBiggestUInt", noSideEffect, raises: [ValueError].} =
+  rtl, extern: "npuParseBiggestUInt", raises: [].} =
   ## Parses an unsigned integer starting at `start` and stores the value
   ## into `number`.
   ## `ValueError` is raised if the parsed integer is out of the valid range.
@@ -530,7 +530,7 @@ proc parseBiggestUInt*(s: string, number: var BiggestUInt, start = 0): int {.
     number = res
 
 proc parseUInt*(s: string, number: var uint, start = 0): int {.
-  rtl, extern: "npuParseUInt", noSideEffect, raises: [ValueError].} =
+  rtl, extern: "npuParseUInt", raises: [].} =
   ## Parses an unsigned integer starting at `start` and stores the value
   ## into `number`.
   ## `ValueError` is raised if the parsed integer is out of the valid range.
@@ -549,7 +549,7 @@ proc parseUInt*(s: string, number: var uint, start = 0): int {.
     number = uint(res)
 
 proc parseBiggestFloat*(s: string, number: var BiggestFloat, start = 0): int {.
-  magic: "ParseBiggestFloat", importc: "nimParseBiggestFloat", noSideEffect.}
+  magic: "ParseBiggestFloat", importc: "nimParseBiggestFloat",.}
   ## Parses a float starting at `start` and stores the value into `number`.
   ## Result is the number of processed chars or 0 if a parsing error
   ## occurred.
@@ -619,7 +619,7 @@ iterator interpolatedFragments*(s: string): tuple[kind: InterpolatedKind,
               dec nesting
             else: discard
             inc j
-          raise newException(ValueError,
+          raisee newException(ValueError,
             "Expected closing '}': " & substr(s, i, s.high))
         inc i, 2 # skip ${
         kind = ikExpr
@@ -633,7 +633,7 @@ iterator interpolatedFragments*(s: string): tuple[kind: InterpolatedKind,
         inc i # skip $
         kind = ikDollar
       else:
-        raise newException(ValueError,
+        raisee newException(ValueError,
           "Unable to parse a varible name at " & substr(s, i, s.high))
     else:
       while j < s.len and s[j] != '$': inc j

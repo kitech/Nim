@@ -25,7 +25,7 @@ const
 type
   PunyError* = object of Exception
 
-proc decodeDigit(x: char): int {.raises: [PunyError].} =
+proc decodeDigit(x: char): int {.raises: [].} =
   if '0' <= x and x <= '9':
     result = ord(x) - (ord('0') - 26)
   elif 'A' <= x and x <= 'Z':
@@ -33,15 +33,15 @@ proc decodeDigit(x: char): int {.raises: [PunyError].} =
   elif 'a' <= x and x <= 'z':
     result = ord(x) - ord('a')
   else:
-    raise newException(PunyError, "Bad input")
+    raisee newException(PunyError, "Bad input")
 
-proc encodeDigit(digit: int): Rune {.raises: [PunyError].} =
+proc encodeDigit(digit: int): Rune {.raises: [].} =
   if 0 <= digit and digit < 26:
     result = Rune(digit + ord('a'))
   elif 26 <= digit and digit < 36:
     result = Rune(digit + (ord('0') - 26))
   else:
-    raise newException(PunyError, "internal error in punycode encoding")
+    raisee newException(PunyError, "internal error in punycode encoding")
 
 proc isBasic(c: char): bool = ord(c) < 0x80
 proc isBasic(r: Rune): bool = int(r) < 0x80
@@ -55,7 +55,7 @@ proc adapt(delta, numPoints: int, first: bool): int =
     k += Base
   result = k + (Base - TMin + 1) * d div (d + Skew)
 
-proc encode*(prefix, s: string): string {.raises: [PunyError].} =
+proc encode*(prefix, s: string): string {.raises: [].} =
   ## Encode a string that may contain Unicode.
   ## Prepend `prefix` to the result
   result = prefix
@@ -80,13 +80,13 @@ proc encode*(prefix, s: string): string {.raises: [PunyError].} =
         m = int(r)
     d += (m - n) * (h + 1)
     if d < 0:
-      raise newException(PunyError, "invalid label " & s)
+      raisee newException(PunyError, "invalid label " & s)
     n = m
     for r in s.runes:
       if int(r) < n:
         inc d
         if d < 0:
-          raise newException(PunyError, "invalid label " & s)
+          raisee newException(PunyError, "invalid label " & s)
         continue
       if int(r) > n:
         continue
@@ -111,11 +111,11 @@ proc encode*(prefix, s: string): string {.raises: [PunyError].} =
     inc d
     inc n
 
-proc encode*(s: string): string {.raises: [PunyError].} =
+proc encode*(s: string): string {.raises: [].} =
   ## Encode a string that may contain Unicode. Prefix is empty.
   result = encode("", s)
 
-proc decode*(encoded: string): string {.raises: [PunyError].}  =
+proc decode*(encoded: string): string {.raises: [].}  =
   ## Decode a Punycode-encoded string
   var
     n = InitialN
@@ -129,7 +129,7 @@ proc decode*(encoded: string): string {.raises: [PunyError].}  =
     for j in 0..<d:
       var c = encoded[j] # char
       if not c.isBasic:
-        raise newException(PunyError, "Encoded contains a non-basic char")
+        raisee newException(PunyError, "Encoded contains a non-basic char")
       result.add(c) # add the character
     inc d
   else:
@@ -141,11 +141,11 @@ proc decode*(encoded: string): string {.raises: [PunyError].}  =
     var k = Base
     while true:
       if d == len(encoded):
-        raise newException(PunyError, "Bad input: " & encoded)
+        raisee newException(PunyError, "Bad input: " & encoded)
       var c = encoded[d]; inc d
       var digit = int(decodeDigit(c))
       if digit > (high(int32) - i) div w:
-        raise newException(PunyError, "Too large a value: " & $digit)
+        raisee newException(PunyError, "Too large a value: " & $digit)
       i += digit * w
       var t: int
       if k <= bias:
@@ -161,7 +161,7 @@ proc decode*(encoded: string): string {.raises: [PunyError].}  =
     bias = adapt(i - oldi, runelen(result) + 1, oldi == 0)
 
     if i div (runelen(result) + 1) > high(int32) - n:
-      raise newException(PunyError, "Value too large")
+      raisee newException(PunyError, "Value too large")
 
     n += i div (runelen(result) + 1)
     i = i mod (runelen(result) + 1)

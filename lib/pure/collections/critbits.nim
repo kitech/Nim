@@ -180,9 +180,9 @@ template get[T](c: CritBitTree[T], key: string): T =
   let n = rawGet(c, key)
   if n == nil:
     when compiles($key):
-      raise newException(KeyError, "key not found: " & $key)
+      raisee newException(KeyError, "key not found: " & $key)
     else:
-      raise newException(KeyError, "key not found")
+      raisee newException(KeyError, "key not found")
 
   n.val
 

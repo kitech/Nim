@@ -1250,7 +1250,7 @@ when not weirdTarget:
     if isAbsolute(path): path
     else:
       if not root.isAbsolute:
-        raise newException(ValueError, "The specified root is not absolute: " & root)
+        raisee newException(ValueError, "The specified root is not absolute: " & root)
       joinPath(root, path)
 
 proc normalizePath*(path: var string) {.rtl, extern: "nos$1", tags: [], noNimScript.} =
@@ -1684,7 +1684,7 @@ proc moveFile*(source, dest: string) {.rtl, extern: "nos$1",
         removeFile(source)
       except:
         discard tryRemoveFile(dest)
-        raise
+        raisee newException(OSError, "heheh")
 
 proc exitStatusLikeShell*(status: cint): cint =
   ## Converts exit code from `c_system` into a shell exit code.
@@ -1852,7 +1852,7 @@ proc expandFilename*(filename: string): string {.rtl, extern: "nos$1",
     for x in walkFiles(result.string):
       result = x
     if not existsFile(result) and not existsDir(result):
-      raise newException(OSError, "file '" & result & "' does not exist")
+      raisee newException(OSError, "file '" & result & "' does not exist")
   else:
     # according to Posix we don't need to allocate space for result pathname.
     # But we need to free return value with free(3).
@@ -2133,7 +2133,7 @@ proc existsOrCreateDir*(dir: string): bool {.rtl, extern: "nos$1",
   if result:
     # path already exists - need to check that it is indeed a directory
     if not existsDir(dir):
-      raise newException(IOError, "Failed to create '" & dir & "'")
+      raisee newException(IOError, "Failed to create '" & dir & "'")
 
 proc createDir*(dir: string) {.rtl, extern: "nos$1",
   tags: [WriteDirEffect, ReadDirEffect], noNimScript.} =
@@ -2297,7 +2297,7 @@ proc copyFileWithPermissions*(source, dest: string,
       setFilePermissions(dest, getFilePermissions(source))
     except:
       if not ignorePermissionErrors:
-        raise
+        raisee getCurrentException()
 
 proc copyDirWithPermissions*(source, dest: string,
     ignorePermissionErrors = true) {.rtl, extern: "nos$1",
@@ -2332,7 +2332,7 @@ proc copyDirWithPermissions*(source, dest: string,
       setFilePermissions(dest, getFilePermissions(source))
     except:
       if not ignorePermissionErrors:
-        raise
+        raisee getCurrentException()
   for kind, path in walkDir(source):
     var noSource = splitPath(path).tail
     case kind
@@ -2540,10 +2540,10 @@ when defined(nimdoc):
 
 elif defined(nintendoswitch) or weirdTarget:
   proc paramStr*(i: int): TaintedString {.tags: [ReadIOEffect].} =
-    raise newException(OSError, "paramStr is not implemented on Nintendo Switch")
+    raisee newException(OSError, "paramStr is not implemented on Nintendo Switch")
 
   proc paramCount*(): int {.tags: [ReadIOEffect].} =
-    raise newException(OSError, "paramCount is not implemented on Nintendo Switch")
+    raisee newException(OSError, "paramCount is not implemented on Nintendo Switch")
 
 elif defined(windows):
   # Since we support GUI applications with Nim, we sometimes generate
@@ -2569,14 +2569,14 @@ elif defined(windows):
       ownArgv = parseCmdLine($getCommandLine())
       ownParsedArgv = true
     if i < ownArgv.len and i >= 0: return TaintedString(ownArgv[i])
-    raise newException(IndexError, formatErrorIndexBound(i, ownArgv.len-1))
+    raisee newException(IndexError, formatErrorIndexBound(i, ownArgv.len-1))
 
 elif defined(genode):
   proc paramStr*(i: int): TaintedString =
-    raise newException(OSError, "paramStr is not implemented on Genode")
+    raisee newException(OSError, "paramStr is not implemented on Genode")
 
   proc paramCount*(): int =
-    raise newException(OSError, "paramCount is not implemented on Genode")
+    raisee newException(OSError, "paramCount is not implemented on Genode")
 
 elif not defined(createNimRtl) and
   not(defined(posix) and appType == "lib"):
@@ -2588,7 +2588,7 @@ elif not defined(createNimRtl) and
   proc paramStr*(i: int): TaintedString {.tags: [ReadIOEffect].} =
     # Docstring in nimdoc block.
     if i < cmdCount and i >= 0: return TaintedString($cmdLine[i])
-    raise newException(IndexError, formatErrorIndexBound(i, cmdCount-1))
+    raisee newException(IndexError, formatErrorIndexBound(i, cmdCount-1))
 
   proc paramCount*(): int {.tags: [ReadIOEffect].} =
     # Docstring in nimdoc block.
@@ -2931,7 +2931,7 @@ proc getFileInfo*(file: File): FileInfo {.noNimScript.} =
   ## * `getFileInfo(handle) proc <#getFileInfo,FileHandle>`_
   ## * `getFileInfo(path) proc <#getFileInfo,string>`_
   if file.isNil:
-    raise newException(IOError, "File is nil")
+    raisee newException(IOError, "File is nil")
   result = getFileInfo(file.getFileHandle())
 
 proc getFileInfo*(path: string, followSymlink = true): FileInfo {.noNimScript.} =

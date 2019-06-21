@@ -1196,7 +1196,7 @@ elif not defined(useNimRtl):
           e.tv_nsec -= s.tv_nsec
         else:
           if e.tv_sec == posix.Time(0):
-            raise newException(ValueError, "System time was modified")
+            raisee newException(ValueError, "System time was modified")
           else:
             diff = s.tv_nsec - e.tv_nsec
             e.tv_nsec = 1_000_000_000 - diff

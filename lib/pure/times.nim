@@ -1772,7 +1772,7 @@ proc `$`*(f: TimeFormat): string =
   f.formatStr
 
 proc raiseParseException(f: TimeFormat, input: string, msg: string) =
-  raise newException(TimeParseError,
+  raisee newException(TimeParseError,
                      "Failed to parse '" & input & "' with format '" & $f & "'. " & msg)
 
 proc parseInt(s: string, b: var int, start = 0, maxLen = int.high,
@@ -1824,7 +1824,7 @@ iterator tokens(f: string): tuple[kind: FormatTokenKind, token: string] =
           i.inc
 
         if i > f.high:
-          raise newException(TimeFormatParseError,
+          raisee newException(TimeFormatParseError,
                              "Unclosed ' in time format string. " &
                              "For a literal ', use ''.")
         i.inc
@@ -1881,7 +1881,7 @@ proc stringToPattern(str: string): FormatPattern =
   of "zzz": result = zzz
   of "zzzz": result = zzzz
   of "g": result = g
-  else: raise newException(TimeFormatParseError,
+  else: raisee newException(TimeFormatParseError,
                            "'" & str & "' is not a valid pattern")
 
 proc initTimeFormat*(format: string): TimeFormat =
@@ -1901,7 +1901,7 @@ proc initTimeFormat*(format: string): TimeFormat =
       else:
         result.patterns.add(FormatPattern.Lit.byte)
         if token.len > 255:
-          raise newException(TimeFormatParseError,
+          raisee newException(TimeFormatParseError,
                              "Format literal is to long:" & token)
         result.patterns.add(token.len.byte)
         for c in token:
@@ -2281,7 +2281,7 @@ proc format*(dt: DateTime, f: TimeFormat, loc: DateTimeLocale = DefaultLocale): 
       idx.inc
 
 proc format*(dt: DateTime, f: string, loc: DateTimeLocale = DefaultLocale): string
-    {.raises: [TimeFormatParseError].} =
+    {.raises: [].} =
   ## Shorthand for constructing a ``TimeFormat`` and using it to format ``dt``.
   ##
   ## See `Parsing and formatting dates`_ for documentation of the
@@ -2302,7 +2302,7 @@ template formatValue*(result: var string; value: DateTime, specifier: string) =
   result.add format(value, specifier)
 
 proc format*(time: Time, f: string, zone: Timezone = local()): string
-    {.raises: [TimeFormatParseError].} =
+    {.raises: [].} =
   ## Shorthand for constructing a ``TimeFormat`` and using it to format
   ## ``time``. Will use the timezone specified by ``zone``.
   ##
@@ -2325,7 +2325,7 @@ template formatValue*(result: var string; value: Time, specifier: string) =
   result.add format(value, specifier)
 
 proc parse*(input: string, f: TimeFormat, zone: Timezone = local(), loc: DateTimeLocale = DefaultLocale): DateTime
-    {.raises: [TimeParseError, Defect].} =
+    {.raises: [].} =
   ## Parses ``input`` as a ``DateTime`` using the format specified by ``f``.
   ## If no UTC offset was parsed, then ``input`` is assumed to be specified in
   ## the ``zone`` timezone. If a UTC offset was parsed, the result will be
@@ -2368,7 +2368,7 @@ proc parse*(input: string, f: TimeFormat, zone: Timezone = local(), loc: DateTim
   result = toDateTime(parsed, zone, f, input)
 
 proc parse*(input, f: string, tz: Timezone = local(), loc: DateTimeLocale = DefaultLocale): DateTime
-    {.raises: [TimeParseError, TimeFormatParseError, Defect].} =
+    {.raises: [].} =
   ## Shorthand for constructing a ``TimeFormat`` and using it to parse
   ## ``input`` as a ``DateTime``.
   ##
@@ -2381,13 +2381,13 @@ proc parse*(input, f: string, tz: Timezone = local(), loc: DateTimeLocale = Defa
   result = input.parse(dtFormat, tz, loc = loc)
 
 proc parse*(input: string, f: static[string], zone: Timezone = local(), loc: DateTimeLocale = DefaultLocale):
-    DateTime {.raises: [TimeParseError, Defect].} =
+    DateTime {.raises: [].} =
   ## Overload that validates ``f`` at compile time.
   const f2 = initTimeFormat(f)
   result = input.parse(f2, zone, loc = loc)
 
 proc parseTime*(input, f: string, zone: Timezone): Time
-    {.raises: [TimeParseError, TimeFormatParseError, Defect].} =
+    {.raises: [].} =
   ## Shorthand for constructing a ``TimeFormat`` and using it to parse
   ## ``input`` as a ``DateTime``, then converting it a ``Time``.
   ##
@@ -2399,7 +2399,7 @@ proc parseTime*(input, f: string, zone: Timezone): Time
   parse(input, f, zone).toTime()
 
 proc parseTime*(input: string, f: static[string], zone: Timezone): Time
-    {.raises: [TimeParseError, Defect].} =
+    {.raises: [].} =
   ## Overload that validates ``format`` at compile time.
   const f2 = initTimeFormat(f)
   result = input.parse(f2, zone).toTime()

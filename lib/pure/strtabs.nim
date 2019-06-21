@@ -139,9 +139,9 @@ template get(t: StringTableRef, key: string) =
   if index >= 0: result = t.data[index].val
   else:
     when compiles($key):
-      raise newException(KeyError, "key not found: " & $key)
+      raisee newException(KeyError, "key not found: " & $key)
     else:
-      raise newException(KeyError, "key not found")
+      raisee newException(KeyError, "key not found")
 
 proc len*(t: StringTableRef): int {.rtlFunc, extern: "nst$1".} =
   ## Returns the number of keys in `t`.
@@ -290,7 +290,7 @@ proc newStringTable*(keyValuePairs: varargs[tuple[key, val: string]],
   for key, val in items(keyValuePairs): result[key] = val
 
 proc raiseFormatException(s: string) =
-  raise newException(ValueError, "format string: key not found: " & s)
+  raisee newException(ValueError, "format string: key not found: " & s)
 
 proc getValue(t: StringTableRef, flags: set[FormatFlag], key: string): string =
   if hasKey(t, key): return t.getOrDefault(key)

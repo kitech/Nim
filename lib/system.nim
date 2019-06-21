@@ -3001,6 +3001,7 @@ proc compiles*(x: untyped): bool {.magic: "Compiles", noSideEffect, compileTime.
 when not defined(js) and not defined(nimscript):
   import "system/ansi_c"
   import "system/memory"
+  c_fprintf(cstderr, "hehhh\n")
 
 when not defined(js):
   {.push stackTrace:off.}
@@ -3028,6 +3029,8 @@ when not defined(js):
 
 when not declared(sysFatal):
   include "system/fatal"
+  when not defined(js) and not defined(nimscript):
+    c_fprintf(cstderr, "hehhh222\n")
 
 when defined(nimV2):
   include core/runtime_v2
@@ -3264,7 +3267,7 @@ var
     ## in case of an `out of memory`:idx: event. The standard handler
     ## writes an error message and terminates the program.
     ##
-    ## `outOfMemHook` can be used to raise an exception in case of OOM like so:
+    ## `outOfMemHook` can be used to raisee an exception in case of OOM like so:
     ##
     ## .. code-block:: Nim
     ##
@@ -3273,11 +3276,11 @@ var
     ##   gOutOfMem.msg = "out of memory"
     ##
     ##   proc handleOOM() =
-    ##     raise gOutOfMem
+    ##     raisee gOutOfMem
     ##
     ##   system.outOfMemHook = handleOOM
     ##
-    ## If the handler does not raise an exception, ordinary control flow
+    ## If the handler does not raisee an exception, ordinary control flow
     ## continues and the program is terminated.
 
 type
@@ -3352,6 +3355,8 @@ template newException*(exceptn: typedesc, message: string;
   e.msg = message
   e.parent = parentException
   e
+
+proc raisee*(exc: ref Exception, stks: seq[StackTraceEntry] = newseq[StackTraceEntry]())
 
 when hostOS == "standalone":
   proc nimToCStringConv(s: NimString): cstring {.compilerProc, inline.} =
@@ -3703,7 +3708,7 @@ when not defined(JS): #and not defined(nimscript):
       ##
       ## Can be used in a ``try`` statement to setup a Lisp-like
       ## `condition system`:idx:\: This prevents the 'raise' statement to
-      ## raise an exception but instead calls ``action``.
+      ## raisee an exception but instead calls ``action``.
       ## If ``action`` returns false, the exception has been handled and
       ## does not propagate further through the call stack.
       if not isNil(excHandler):
@@ -4458,3 +4463,6 @@ export io
 
 when not defined(createNimHcr):
   include nimhcr
+
+include system/nertl
+

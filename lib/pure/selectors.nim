@@ -276,7 +276,7 @@ else:
     else:
       msg.add("Internal Error\n")
     var err = newException(IOSelectorsException, msg)
-    raise err
+    raisee err
 
   proc setNonBlocking(fd: cint) {.inline.} =
     setBlocking(fd.SocketHandle, false)

@@ -312,7 +312,7 @@ type
 proc si_pid*(info: SigInfo): Pid =
   ## This might not be correct behavior. si_pid doesn't exist in Switch's
   ## devkitpro headers
-  raise newException(OSError, "Nintendo switch cannot get si_pid!")
+  raisee newException(OSError, "Nintendo switch cannot get si_pid!")
 
 type
   Taiocb* {.importc: "struct aiocb", header: "<aio.h>",

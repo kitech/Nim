@@ -89,7 +89,7 @@ else:
                           tags: [ReadIOEffect, WriteIOEffect].} =
     var buffer = linenoise.readLine(prompt)
     if isNil(buffer):
-      raise newException(IOError, "Linenoise returned nil")
+      raisee newException(IOError, "Linenoise returned nil")
     result = TaintedString($buffer)
     if result.string.len > 0:
       historyAdd(buffer)

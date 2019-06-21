@@ -273,10 +273,10 @@ proc `%`*(frmt: string, args: openArray[Rope]): Rope {.
           j = j * 10 + ord(frmt[i]) - ord('0')
           inc(i)
         if frmt[i] == '}': inc(i)
-        else: raise newException(ValueError, "invalid format string")
+        else: raisee newException(ValueError, "invalid format string")
 
         add(result, args[j-1])
-      else: raise newException(ValueError, "invalid format string")
+      else: raisee newException(ValueError, "invalid format string")
     var start = i
     while i < length:
       if frmt[i] != '$': inc(i)

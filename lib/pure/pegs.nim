@@ -1783,7 +1783,7 @@ proc pegError(p: PegParser, msg: string, line = -1, col = -1) =
   var e: ref EInvalidPeg
   new(e)
   e.msg = errorStr(p, msg, line, col)
-  raise e
+  raisee e
 
 proc getTok(p: var PegParser) =
   getTok(p, p.tok)

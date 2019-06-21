@@ -82,7 +82,7 @@ proc dbError*(db: DbConn) {.noreturn.} =
   var e: ref DbError
   new(e)
   e.msg = $pqErrorMessage(db)
-  raise e
+  raisee e
 
 proc dbQuote*(s: string): string =
   ## DB quotes the string.

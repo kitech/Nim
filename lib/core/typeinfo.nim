@@ -201,14 +201,14 @@ proc `[]`*(x: Any, i: int): Any =
   of tyArray:
     var bs = x.rawType.base.size
     if i >=% x.rawType.size div bs:
-      raise newException(IndexError, formatErrorIndexBound(i, x.rawType.size div bs))
+      raisee newException(IndexError, formatErrorIndexBound(i, x.rawType.size div bs))
     return newAny(x.value +!! i*bs, x.rawType.base)
   of tySequence:
     var s = cast[ppointer](x.value)[]
-    if s == nil: raise newException(ValueError, "sequence is nil")
+    if s == nil: raisee newException(ValueError, "sequence is nil")
     var bs = x.rawType.base.size
     if i >=% cast[PGenSeq](s).len:
-      raise newException(IndexError, formatErrorIndexBound(i, cast[PGenSeq](s).len-1))
+      raisee newException(IndexError, formatErrorIndexBound(i, cast[PGenSeq](s).len-1))
     return newAny(s +!! (GenericSeqSize+i*bs), x.rawType.base)
   else: assert false
 
@@ -218,15 +218,15 @@ proc `[]=`*(x: Any, i: int, y: Any) =
   of tyArray:
     var bs = x.rawType.base.size
     if i >=% x.rawType.size div bs:
-      raise newException(IndexError, formatErrorIndexBound(i, x.rawType.size div bs))
+      raisee newException(IndexError, formatErrorIndexBound(i, x.rawType.size div bs))
     assert y.rawType == x.rawType.base
     genericAssign(x.value +!! i*bs, y.value, y.rawType)
   of tySequence:
     var s = cast[ppointer](x.value)[]
-    if s == nil: raise newException(ValueError, "sequence is nil")
+    if s == nil: raisee newException(ValueError, "sequence is nil")
     var bs = x.rawType.base.size
     if i >=% cast[PGenSeq](s).len:
-      raise newException(IndexError, formatErrorIndexBound(i, cast[PGenSeq](s).len-1))
+      raisee newException(IndexError, formatErrorIndexBound(i, cast[PGenSeq](s).len-1))
     assert y.rawType == x.rawType.base
     genericAssign(s +!! (GenericSeqSize+i*bs), y.value, y.rawType)
   else: assert false
@@ -353,7 +353,7 @@ proc `[]=`*(x: Any, fieldName: string, value: Any) =
     assert n.typ == value.rawType
     genericAssign(x.value +!! n.offset, value.value, value.rawType)
   else:
-    raise newException(ValueError, "invalid field name: " & fieldName)
+    raisee newException(ValueError, "invalid field name: " & fieldName)
 
 proc `[]`*(x: Any, fieldName: string): Any =
   ## gets a field of `x`; `x` represents an object or a tuple.
@@ -369,7 +369,7 @@ proc `[]`*(x: Any, fieldName: string): Any =
   elif x.rawType.kind == tyObject and x.rawType.base != nil:
     return `[]`(newAny(x.value, x.rawType.base), fieldName)
   else:
-    raise newException(ValueError, "invalid field name: " & fieldName)
+    raisee newException(ValueError, "invalid field name: " & fieldName)
 
 proc `[]`*(x: Any): Any =
   ## dereference operation for the any `x` that represents a ptr or a ref.
